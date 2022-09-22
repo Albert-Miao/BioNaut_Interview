@@ -4,7 +4,6 @@ import numpy as np
 import os
 
 import argparse
-import unittest
 
 
 class Ball:
