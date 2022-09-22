@@ -4,6 +4,7 @@ import numpy as np
 import os
 
 import argparse
+import unittest
 
 
 class Ball:
@@ -22,13 +23,13 @@ class ScreenWriter:
         return 0
 
 
-# TODO: creates argparse object and passes to parse_args function
-# TODO: creates Ball object to be run, initialized with core args
-# TODO: creates ScreenWriter object, initialized with core args
-# TODO: For however long the video lasts, grab the next frame from Ball with something like nextFrame().
+# NEED: creates argparse object and passes to parse_args function
+# NEED: creates Ball object to be run, initialized with core args
+# NEED: creates ScreenWriter object, initialized with core args
+# NEED: For however long the video lasts, grab the next frame from Ball with something like nextFrame().
 #       Probably returns info of position, color, major and minor axis.
-# TODO: Pass relevant info to ScreenWriter and append result to images list
-# TODO: Save images.
+# NEED: Pass relevant info to ScreenWriter and append result to images list
+# NEED: Save images.
 
 
 def main():
