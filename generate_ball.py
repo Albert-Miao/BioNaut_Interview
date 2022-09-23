@@ -11,33 +11,40 @@ PRE_SCALED_HOR_VEL = 1
 
 
 class Ball:
-    # Initializes Ball with color as an RGB tuple, acceleration in px/s^2, starting height in px, duration in either 
-    # number of frames or bounces, and a boolean determining whether to count by bounces or frames. Also initializes
-    # velocity and ball size.
+    # Initializes Ball with color as an RGB tuple, ball radius, & starting height in px, all in a dictionary.
+    # Store duration in either number of frames or bounces, and a boolean determining whether to count by bounces or
+    # frames. Also initializes velocity and acceleration.
     #
-    # acceleration should be limited to a positive value less than the starting height * ACCEL_TO_HEIGHT_LIMIT.
-    # starting_height should be a positive value. Can be more than the resolution height.
+    # ball_attr is a dictionary with keys ['color', 'radius', 'starting_height']
+    #   'color': A 3-dim tuple of integers between 0 and 255
+    #   'radius': A positive float larger than 0.5
+    #   'starting_height': A positive float greater than radius.
+    #
+    # acceleration should be a positive value.
     # duration should a positive integer regardless of frames or bounces.
     # bounces_or_frames = True when counting bounces, False when counting frames.
-    def __init__(self, color, acceleration, starting_height, duration, count_frames):
-        assert type(color) is list and len(color) == 3
-        assert type(color[0]) is int and type(color[1]) is int and type(color[2]) is int
-        assert 0 <= color[0] <= 255 and 0 <= color[1] <= 255 and 0 <= color[2] <= 255
+    def __init__(self, ball_attr, acceleration, duration, count_frames):
+        assert type(ball_attr['color']) is list and len(ball_attr['color']) == 3
+        assert type(ball_attr['color'][0]) is int and \
+               type(ball_attr['color'][1]) is int and \
+               type(ball_attr['color'][2]) is int
+        assert 0 <= ball_attr['color'][0] <= 255 and \
+               0 <= ball_attr['color'][1] <= 255 and \
+               0 <= ball_attr['color'][2] <= 255
 
         assert type(acceleration) is float or type(acceleration) is int
         assert acceleration > 0
 
-        assert type(starting_height) is float or type(starting_height) is int
-        assert starting_height > 0
+        assert type(ball_attr['starting_height']) is float or type(ball_attr['starting_height']) is int
+        assert ball_attr['starting_height'] > 0
 
         assert type(count_frames) is bool
-
         assert type(duration) is int
 
         # Initialize Ball values
-        self.color = color
+        self.color = ball_attr['color']
         self.acceleration = acceleration
-        self.height = starting_height
+        self.height = ball_attr['starting_height']
         self.count_bounces = count_frames
 
         if self.count_bounces:
@@ -75,11 +82,8 @@ class ScreenWriter:
 
 def main():
     args = parse_args(sys.argv[1:])
-    print('Number of balls: ' + str(len(args)))
-
-    balls = []
-    for arg in args:
-        balls.append(Ball)
+    ball_args = args['balls']
+    print('Number of balls: ' + str(len(ball_args)))
 
     return
 
@@ -91,7 +95,7 @@ def parse_args(args):
                         help='Color of the ball in RGB. Separate values by spaces (--color 255 255 255)')
     parser.add_argument('--starting_height', dest='starting_height', type=float, default=400.,
                         help='Starting height of the ball in pixels.')
-    parser.add_argument('--ball_radius', dest='ball_radius', type=float, default=20.,
+    parser.add_argument('--radius', dest='radius', type=float, default=20.,
                         help='Radius of the ball in pixels. Ball must be able to fit within given window.')
 
     parser.add_argument('--count_frames', dest='count_frames', action='store_true',
@@ -112,7 +116,7 @@ def parse_args(args):
 
     assert len(args.color) == 3
     assert 0 <= args.color[0] <= 255 and 0 <= args.color[1] <= 255 and 0 <= args.color[2] <= 255
-    assert args.ball_radius > 0.5
+    assert args.radius > 0.5
     assert args.starting_height > 0
 
     assert args.duration > 0
@@ -127,11 +131,13 @@ def parse_args(args):
     duration = args.duration
     fps = args.fps
 
-    assert args.ball_radius * 2 <= resolution[0] and \
-           args.ball_radius * 2 <= resolution[1] and \
+    assert args.radius * 2 <= resolution[0] and \
+           args.radius * 2 <= resolution[1] and \
            "Ball is larger than the resolution of the image."
 
-    if args.starting_height + args.ball_radius > resolution[1]:
+    assert args.starting_height - args.radius > 0 and 'Ball cannot start below or on the ground.'
+
+    if args.starting_height + args.radius > resolution[1]:
         print("WARNING: Inputted starting_height plus ball radius is greater than the height of the window.")
 
     balls = []
@@ -144,7 +150,7 @@ def parse_args(args):
 
     ball = {'color': args.color,
             'starting_height': args.starting_height,
-            'ball_radius': args.ball_radius}
+            'radius': args.radius}
 
     output_args = {'balls': [ball] + balls,
                    'acceleration': acceleration,
@@ -167,7 +173,7 @@ def parse_ball_args(args, resolution):
                         help='Color of the ball in RGB. Separate values by spaces (--color 255 255 255)')
     parser.add_argument('--starting_height', dest='starting_height', type=float, default=400.,
                         help='Starting height of the ball in pixels.')
-    parser.add_argument('--ball_radius', dest='ball_radius', type=float, default=20.,
+    parser.add_argument('--radius', dest='radius', type=float, default=20.,
                         help='Radius of the ball in pixels. Ball must be able to fit within given window.')
     parser.add_argument('--additional_ball', dest='additional_ball', action='store_true',
                         help='Input values for another ball after this one.')
@@ -176,14 +182,14 @@ def parse_ball_args(args, resolution):
 
     assert len(args.color) == 3
     assert 0 <= args.color[0] <= 255 and 0 <= args.color[1] <= 255 and 0 <= args.color[2] <= 255
-    assert args.ball_radius > 0.5
+    assert args.radius > 0.5
     assert args.starting_height > 0
 
-    assert args.ball_radius * 2 <= resolution[0] and \
-           args.ball_radius * 2 <= resolution[1] and \
+    assert args.radius * 2 <= resolution[0] and \
+           args.radius * 2 <= resolution[1] and \
            "Ball is larger than the resolution of the image."
 
-    if args.starting_height + args.ball_radius > resolution[1]:
+    if args.starting_height + args.radius > resolution[1]:
         print("WARNING: Inputted starting_height plus ball radius is greater than the height of the window.")
 
     balls = []
@@ -196,7 +202,7 @@ def parse_ball_args(args, resolution):
 
     ball = {'color': args.color,
             'starting_height': args.starting_height,
-            'ball_radius': args.ball_radius}
+            'radius': args.radius}
     balls.insert(0, ball)
 
     return balls
