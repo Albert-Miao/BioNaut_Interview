@@ -86,11 +86,14 @@ def main():
 
 
 def parse_args(args):
+    output_args = []
     parser = argparse.ArgumentParser()
 
     parser.add_argument('--color', dest='color', nargs="+", type=int, default=[255, 255, 255],
                         help='Color of the ball in RGB. Separate values by spaces (--color 255 255 255)')
-    parser.add_argument('--count_frames', dest='count_frames', action='store_true')
+    parser.add_argument('--count_frames', dest='count_frames', action='store_true',
+                        help='Whether to determine video length by number of frames. If not, determined by number of '
+                             'bounces.')
     parser.add_argument('--duration', dest='duration', type=int, default=3,
                         help='If --count_frames, number of frames, else number of bounces.')
     parser.add_argument('--acceleration', dest='acceleration', type=float, default=9.81,
@@ -103,6 +106,8 @@ def parse_args(args):
                         help='Radius of the ball in pixels. Ball must be able to fit within given window.')
     parser.add_argument('--fps', dest='fps', type=float, default=30.,
                         help='Frames per second.')
+    parser.add_argument('--additional_ball', dest='additional_ball', action='store_true',
+                        help='Input values for another ball after this one.')
 
     args = parser.parse_args(args)
 
@@ -117,17 +122,23 @@ def parse_args(args):
     assert args.resolution[0] > 0 and args.resolution[1] > 0
 
     assert args.starting_height > 0
-    
+
     assert args.ball_radius * 2 <= args.resolution[0] and \
            args.ball_radius * 2 <= args.resolution[1] and \
            "Ball is larger than the resolution of the image."
-    
+
     assert args.fps > 0
 
     if args.starting_height + args.ball_radius > args.resolution[1]:
         print("WARNING: Inputted starting_height plus ball radius is greater than the height of the window.")
 
-    return args
+    if args.additional_ball:
+        new_args = input('Input new arguments as before (formatted \": --color ...\"): ').split(' ')
+        output_args = parse_args(new_args)
+
+    output_args.append(args)
+
+    return output_args
 
 
 if __name__ == "__main__":

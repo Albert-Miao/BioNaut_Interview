@@ -34,13 +34,14 @@ class TestHelperMethods(unittest.TestCase):
                            '--ball_radius', '200',
                            '--fps', '60'])
 
-        self.assertTrue(args.color[0] == 128 and args.color[1] == 0 and args.color[2] == 64)
-        self.assertTrue(args.count_frames)
-        self.assertTrue(args.duration == 600)
-        self.assertTrue(args.resolution[0] == 1920 and args.resolution[1] == 1080)
-        self.assertTrue(args.starting_height == 800)
-        self.assertTrue(args.ball_radius == 200)
-        self.assertTrue(args.fps == 60)
+        self.assertTrue(args[0].color[0] == 128 and args[0].color[1] == 0 and args[0].color[2] == 64)
+        self.assertTrue(args[0].count_frames)
+        self.assertTrue(args[0].duration == 600)
+        self.assertTrue(args[0].resolution[0] == 1920 and args[0].resolution[1] == 1080)
+        self.assertTrue(args[0].starting_height == 800)
+        self.assertTrue(args[0].ball_radius == 200)
+        self.assertTrue(args[0].fps == 60)
+        self.assertFalse(args[0].additional_ball)
 
     def test_parse_args2(self):
         self.assertRaises(AssertionError,
@@ -52,3 +53,5 @@ class TestHelperMethods(unittest.TestCase):
                                        '--starting_height', '800',
                                        '--ball_radius', '600',
                                        '--fps', '60'])
+        
+
