@@ -97,20 +97,30 @@ def parse_args():
                         help='Resolution of video. Must be 2-dim tuple of positive integers.')
     parser.add_argument('--starting_height', dest='starting_height', type=float, default=400.,
                         help='Starting height of the ball in pixels.')
+    parser.add_argument('--ball_radius', dest='ball_radius', type=float, default=20.,
+                        help='Radius of the ball in pixels. Ball must be able to fit within given window.')
+    parser.add_argument('--fps', dest='fps', type=float, default=30.,
+                        help='Frames per second.')
 
     args = parser.parse_args()
 
-    assert (len(args.color) == 3)
-    assert (0 <= args.color[0] <= 255 and 0 <= args.color[1] <= 255 and 0 <= args.color[2] <= 255)
+    assert len(args.color) == 3
+    assert 0 <= args.color[0] <= 255 and 0 <= args.color[1] <= 255 and 0 <= args.color[2] <= 255
 
-    assert (args.duration > 0)
+    assert args.duration > 0
 
-    assert (args.acceleration > 0)
+    assert args.acceleration > 0
 
-    assert (len(args.resolution) == 2)
-    assert (args.resolution[0] > 0 and args.resolution[1] > 0)
+    assert len(args.resolution) == 2
+    assert args.resolution[0] > 0 and args.resolution[1] > 0
 
-    assert (args.starting_height > 0)
+    assert args.starting_height > 0
+    
+    assert args.ball_radius * 2 <= args.resolution[0] and \
+           args.ball_radius * 2 <= args.resolution[1] and \
+           "Ball is larger than the resolution of the image."
+    
+    assert args.fps > 0
 
     if args.starting_height > args.resolution[1]:
         print("WARNING: Inputted starting_height is greater than the height of the window.")
