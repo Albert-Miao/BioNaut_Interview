@@ -7,6 +7,8 @@ import os
 
 import argparse
 
+PRE_SCALED_HOR_VEL = 1
+
 
 class Ball:
     # Initializes Ball with color as an RGB tuple, acceleration in px/s^2, starting height in px, duration in either 
@@ -87,6 +89,11 @@ def parse_args(args):
 
     parser.add_argument('--color', dest='color', nargs="+", type=int, default=[255, 255, 255],
                         help='Color of the ball in RGB. Separate values by spaces (--color 255 255 255)')
+    parser.add_argument('--starting_height', dest='starting_height', type=float, default=400.,
+                        help='Starting height of the ball in pixels.')
+    parser.add_argument('--ball_radius', dest='ball_radius', type=float, default=20.,
+                        help='Radius of the ball in pixels. Ball must be able to fit within given window.')
+
     parser.add_argument('--count_frames', dest='count_frames', action='store_true',
                         help='Whether to determine video length by number of frames. If not, determined by number of '
                              'bounces.')
@@ -96,10 +103,6 @@ def parse_args(args):
                         help='Acceleration due to gravity in pixels/seconds^2. Must be positive (above 0).')
     parser.add_argument('--resolution', dest='resolution', nargs="+", type=int, default=[640, 480],
                         help='Resolution of video. Must be 2-dim tuple of positive integers.')
-    parser.add_argument('--starting_height', dest='starting_height', type=float, default=400.,
-                        help='Starting height of the ball in pixels.')
-    parser.add_argument('--ball_radius', dest='ball_radius', type=float, default=20.,
-                        help='Radius of the ball in pixels. Ball must be able to fit within given window.')
     parser.add_argument('--fps', dest='fps', type=float, default=30.,
                         help='Frames per second.')
     parser.add_argument('--additional_ball', dest='additional_ball', action='store_true',
@@ -109,14 +112,13 @@ def parse_args(args):
 
     assert len(args.color) == 3
     assert 0 <= args.color[0] <= 255 and 0 <= args.color[1] <= 255 and 0 <= args.color[2] <= 255
+    assert args.ball_radius > 0.5
+    assert args.starting_height > 0
 
     assert args.duration > 0
     assert args.acceleration > 0
-
     assert len(args.resolution) == 2
     assert args.resolution[0] > 0 and args.resolution[1] > 0
-
-    assert args.starting_height > 0
     assert args.fps > 0
 
     acceleration = args.acceleration
@@ -174,7 +176,7 @@ def parse_ball_args(args, resolution):
 
     assert len(args.color) == 3
     assert 0 <= args.color[0] <= 255 and 0 <= args.color[1] <= 255 and 0 <= args.color[2] <= 255
-
+    assert args.ball_radius > 0.5
     assert args.starting_height > 0
 
     assert args.ball_radius * 2 <= resolution[0] and \
