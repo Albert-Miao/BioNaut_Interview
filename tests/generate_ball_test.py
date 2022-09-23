@@ -6,7 +6,13 @@ from unittest.mock import patch
 
 class TestBallMethods(unittest.TestCase):
     def test_init(self):
-        ball = Ball([127, 100, 156], 9.81, 300, 5, False)
+        ball_attr = {
+            'color': [127, 100, 156],
+            'radius': 10,
+            'starting_height': 300
+        }
+
+        ball = Ball(ball_attr, 9.81, 5, False)
 
         self.assertTrue(ball.color[0] == 127 and ball.color[1] == 100 and ball.color[2] == 156)
         self.assertTrue(ball.acceleration == 9.81)

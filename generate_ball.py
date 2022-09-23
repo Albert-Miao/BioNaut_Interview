@@ -148,16 +148,20 @@ def parse_args(args):
 
         balls = parse_ball_args(new_args, resolution)
 
-    ball = {'color': args.color,
-            'starting_height': args.starting_height,
-            'radius': args.radius}
+    ball = {
+        'color': args.color,
+        'starting_height': args.starting_height,
+        'radius': args.radius
+    }
 
-    output_args = {'balls': [ball] + balls,
-                   'acceleration': acceleration,
-                   'resolution': resolution,
-                   'count_frames': count_frames,
-                   'duration': duration,
-                   'fps': fps}
+    output_args = {
+        'balls': [ball] + balls,
+        'acceleration': acceleration,
+        'resolution': resolution,
+        'count_frames': count_frames,
+        'duration': duration,
+        'fps': fps
+    }
 
     return output_args
 
@@ -200,9 +204,11 @@ def parse_ball_args(args, resolution):
 
         balls = parse_ball_args(new_args, resolution)
 
-    ball = {'color': args.color,
-            'starting_height': args.starting_height,
-            'radius': args.radius}
+    ball = {
+        'color': args.color,
+        'starting_height': args.starting_height,
+        'radius': args.radius
+    }
     balls.insert(0, ball)
 
     return balls
