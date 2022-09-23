@@ -20,8 +20,8 @@ class Ball:
     # starting_height should be a positive value. Can be more than the resolution height.
     # duration should a positive value, and an integer if counting bounces
     # bounces_or_frames = True when counting bounces, False when counting frames.
-    def __init__(self, color, acceleration, starting_height, duration, bounces_or_frames):
-        assert type(color) is tuple and len(color) == 3
+    def __init__(self, color, acceleration, starting_height, duration, count_frames):
+        assert type(color) is list and len(color) == 3
         assert type(color[0]) is int and type(color[1]) is int and type(color[2]) is int
         assert 0 <= color[0] <= 255 and 0 <= color[1] <= 255 and 0 <= color[2] <= 255
 
@@ -31,9 +31,9 @@ class Ball:
         assert type(starting_height) is float or type(starting_height) is int
         assert starting_height > 0
 
-        assert type(bounces_or_frames) is bool
+        assert type(count_frames) is bool
 
-        if bounces_or_frames:
+        if count_frames:
             assert type(duration) is int
         else:
             assert type(duration) is int or type(duration) is float
@@ -42,14 +42,14 @@ class Ball:
         self.color = color
         self.acceleration = acceleration
         self.height = starting_height
-        self.count_bounces = bounces_or_frames
+        self.count_bounces = count_frames
 
         if self.count_bounces:
-            self.max_bounces = duration
-            self.curr_bounces = 0
-        else:
             self.max_frames = duration
             self.curr_frames = 0
+        else:
+            self.max_bounces = duration
+            self.curr_bounces = 0
 
         self.hor_vel = PRE_SCALED_HOR_VEL
         self.ver_vel = 0
@@ -66,7 +66,7 @@ class ScreenWriter:
         return 0
 
 
-# NEED: creates argparse object and passes to parse_args function
+# TODO: creates argparse object and passes to parse_args function
 # NEED: creates Ball object to be run, initialized with core args
 # NEED: creates ScreenWriter object, initialized with core args
 # NEED: For however long the video lasts, grab the next frame from Ball with something like nextFrame().
@@ -78,8 +78,30 @@ class ScreenWriter:
 
 
 def main():
-
+    args = parse_args()
+    
+    
     return
+
+
+def parse_args():
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument('--color', dest='color', nargs="+", type=int, default=[255, 255, 255],
+                        help='Color of the ball in RGB. Separate values by spaces (--color 255 255 255)')
+    parser.add_argument('--count_frames', dest='count_frames', action='store_true')
+    parser.add_argument('--duration', dest='duration', type=int, default=3,
+                        help='If --count_frames, number of frames, else number of bounces.')
+    parser.add_argument('--acceleration', dest='acceleration', type=float, default=9.81,
+                        help='Acceleration due to gravity in pixels/seconds^2. Must be positive (above 0).')
+    parser.add_argument('--resolution', dest='resolution', nargs="+", type=int, default=[640, 480],
+                        help='Resolution of video. Must be 2-dim tuple of positive integers.')
+    parser.add_argument('--starting_height', dest='starting_height', type=float, default=400.,
+                        help='Starting height of the ball.')
+    
+    
+
+    return parser.parse_args()
 
 
 if __name__ == "__main__":
