@@ -11,7 +11,6 @@ ACCEL_TO_HEIGHT_LIMIT = 2
 
 
 class Ball:
-
     # Initializes Ball with color as an RGB tuple, acceleration in px/s^2, starting height in px, duration in either 
     # number of frames or bounces, and a boolean determining whether to count by bounces or frames. Also initializes
     # velocity and ball size.
@@ -76,6 +75,7 @@ class ScreenWriter:
 
 
 def main():
+
     return
 
 
