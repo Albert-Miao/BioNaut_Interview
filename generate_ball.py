@@ -130,12 +130,19 @@ def parse_args(args):
         print("WARNING: Inputted starting_height plus ball radius is greater than the height of the window.")
 
     if args.additional_ball:
-        new_args = input('Input new arguments as before (formatted \": --color ...\"): ').split(' ')
+        new_args = get_input('Input new arguments as before (formatted \": --color ...\"): ').strip().split(' ')
+        if new_args[0] == '':
+            new_args = []
+
         output_args = parse_args(new_args)
 
-    output_args.append(args)
+    output_args.insert(0, args)
 
     return output_args
+
+
+def get_input(text):
+    return input(text)
 
 
 if __name__ == "__main__":
