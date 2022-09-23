@@ -124,8 +124,8 @@ def parse_args(args):
     
     assert args.fps > 0
 
-    if args.starting_height > args.resolution[1]:
-        print("WARNING: Inputted starting_height is greater than the height of the window.")
+    if args.starting_height + args.ball_radius > args.resolution[1]:
+        print("WARNING: Inputted starting_height plus ball radius is greater than the height of the window.")
 
     return args
 
