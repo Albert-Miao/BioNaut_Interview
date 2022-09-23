@@ -50,7 +50,7 @@ class Ball:
             self.max_frames = duration
             self.curr_frames = 0
 
-        self.hor_vel = 0
+        self.hor_vel = 
         self.ver_vel = 0
 
     def nextFrame(self):
