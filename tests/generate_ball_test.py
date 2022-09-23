@@ -21,3 +21,7 @@ class TestBallMethods(unittest.TestCase):
         self.assertTrue(hasattr(ball, 'ver_vel'))
         self.assertTrue(ball.hor_vel == PRE_SCALED_HOR_VEL)
         self.assertTrue(ball.ver_vel == 0)
+        
+class TestHelperMethods(unittest.TestCase):
+    def test_parse_args(self):
+        return

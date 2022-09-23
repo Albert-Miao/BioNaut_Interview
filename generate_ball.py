@@ -1,3 +1,5 @@
+import sys
+
 import cv2
 import math
 import numpy as np
@@ -66,7 +68,7 @@ class ScreenWriter:
         return 0
 
 
-# TODO: creates argparse object and passes to parse_args function
+# DONE: creates argparse object and passes to parse_args function
 # NEED: creates Ball object to be run, initialized with core args
 # NEED: creates ScreenWriter object, initialized with core args
 # NEED: For however long the video lasts, grab the next frame from Ball with something like nextFrame().
@@ -78,12 +80,12 @@ class ScreenWriter:
 
 
 def main():
-    args = parse_args()
+    args = parse_args(sys.argv[1:])
 
     return
 
 
-def parse_args():
+def parse_args(args):
     parser = argparse.ArgumentParser()
 
     parser.add_argument('--color', dest='color', nargs="+", type=int, default=[255, 255, 255],
@@ -102,7 +104,7 @@ def parse_args():
     parser.add_argument('--fps', dest='fps', type=float, default=30.,
                         help='Frames per second.')
 
-    args = parser.parse_args()
+    args = parser.parse_args(args)
 
     assert len(args.color) == 3
     assert 0 <= args.color[0] <= 255 and 0 <= args.color[1] <= 255 and 0 <= args.color[2] <= 255
