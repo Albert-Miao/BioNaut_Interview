@@ -20,7 +20,7 @@ class Ball:
     #
     # acceleration should be limited to a positive value less than the starting height * ACCEL_TO_HEIGHT_LIMIT.
     # starting_height should be a positive value. Can be more than the resolution height.
-    # duration should a positive value, and an integer if counting bounces
+    # duration should a positive integer regardless of frames or bounces.
     # bounces_or_frames = True when counting bounces, False when counting frames.
     def __init__(self, color, acceleration, starting_height, duration, count_frames):
         assert type(color) is list and len(color) == 3
@@ -35,10 +35,7 @@ class Ball:
 
         assert type(count_frames) is bool
 
-        if count_frames:
-            assert type(duration) is int
-        else:
-            assert type(duration) is int or type(duration) is float
+        assert type(duration) is int
 
         # Initialize Ball values
         self.color = color
