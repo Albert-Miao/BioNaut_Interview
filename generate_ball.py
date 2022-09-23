@@ -79,8 +79,7 @@ class ScreenWriter:
 
 def main():
     args = parse_args()
-    
-    
+
     return
 
 
@@ -97,11 +96,26 @@ def parse_args():
     parser.add_argument('--resolution', dest='resolution', nargs="+", type=int, default=[640, 480],
                         help='Resolution of video. Must be 2-dim tuple of positive integers.')
     parser.add_argument('--starting_height', dest='starting_height', type=float, default=400.,
-                        help='Starting height of the ball.')
-    
-    
+                        help='Starting height of the ball in pixels.')
 
-    return parser.parse_args()
+    args = parser.parse_args()
+
+    assert (len(args.color) == 3)
+    assert (0 <= args.color[0] <= 255 and 0 <= args.color[1] <= 255 and 0 <= args.color[2] <= 255)
+
+    assert (args.duration > 0)
+
+    assert (args.acceleration > 0)
+
+    assert (len(args.resolution) == 2)
+    assert (args.resolution[0] > 0 and args.resolution[1] > 0)
+
+    assert (args.starting_height > 0)
+
+    if args.starting_height > args.resolution[1]:
+        print("WARNING: Inputted starting_height is greater than the height of the window.")
+
+    return args
 
 
 if __name__ == "__main__":
