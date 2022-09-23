@@ -7,11 +7,6 @@ import os
 
 import argparse
 
-BALL_SIZE = 20
-FPS = 30
-ACCEL_TO_HEIGHT_LIMIT = 2
-PRE_SCALED_HOR_VEL = 1
-
 
 class Ball:
     # Initializes Ball with color as an RGB tuple, acceleration in px/s^2, starting height in px, duration in either 
@@ -78,12 +73,16 @@ class ScreenWriter:
 
 def main():
     args = parse_args(sys.argv[1:])
+    print('Number of balls: ' + str(len(args)))
+
+    balls = []
+    for arg in args:
+        balls.append(Ball)
 
     return
 
 
 def parse_args(args):
-    output_args = []
     parser = argparse.ArgumentParser()
 
     parser.add_argument('--color', dest='color', nargs="+", type=int, default=[255, 255, 255],
@@ -112,37 +111,93 @@ def parse_args(args):
     assert 0 <= args.color[0] <= 255 and 0 <= args.color[1] <= 255 and 0 <= args.color[2] <= 255
 
     assert args.duration > 0
-
     assert args.acceleration > 0
 
     assert len(args.resolution) == 2
     assert args.resolution[0] > 0 and args.resolution[1] > 0
 
     assert args.starting_height > 0
-
-    assert args.ball_radius * 2 <= args.resolution[0] and \
-           args.ball_radius * 2 <= args.resolution[1] and \
-           "Ball is larger than the resolution of the image."
-
     assert args.fps > 0
 
-    if args.starting_height + args.ball_radius > args.resolution[1]:
+    acceleration = args.acceleration
+    resolution = args.resolution
+    count_frames = args.count_frames
+    duration = args.duration
+    fps = args.fps
+
+    assert args.ball_radius * 2 <= resolution[0] and \
+           args.ball_radius * 2 <= resolution[1] and \
+           "Ball is larger than the resolution of the image."
+
+    if args.starting_height + args.ball_radius > resolution[1]:
         print("WARNING: Inputted starting_height plus ball radius is greater than the height of the window.")
 
+    balls = []
     if args.additional_ball:
         new_args = get_input('Input new arguments as before (formatted \": --color ...\"): ').strip().split(' ')
         if new_args[0] == '':
             new_args = []
 
-        output_args = parse_args(new_args)
+        balls = parse_ball_args(new_args, resolution)
 
-    output_args.insert(0, args)
+    ball = {'color': args.color,
+            'starting_height': args.starting_height,
+            'ball_radius': args.ball_radius}
+
+    output_args = {'balls': [ball] + balls,
+                   'acceleration': acceleration,
+                   'resolution': resolution,
+                   'count_frames': count_frames,
+                   'duration': duration,
+                   'fps': fps}
 
     return output_args
 
 
 def get_input(text):
     return input(text)
+
+
+def parse_ball_args(args, resolution):
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument('--color', dest='color', nargs="+", type=int, default=[255, 255, 255],
+                        help='Color of the ball in RGB. Separate values by spaces (--color 255 255 255)')
+    parser.add_argument('--starting_height', dest='starting_height', type=float, default=400.,
+                        help='Starting height of the ball in pixels.')
+    parser.add_argument('--ball_radius', dest='ball_radius', type=float, default=20.,
+                        help='Radius of the ball in pixels. Ball must be able to fit within given window.')
+    parser.add_argument('--additional_ball', dest='additional_ball', action='store_true',
+                        help='Input values for another ball after this one.')
+
+    args = parser.parse_args(args)
+
+    assert len(args.color) == 3
+    assert 0 <= args.color[0] <= 255 and 0 <= args.color[1] <= 255 and 0 <= args.color[2] <= 255
+
+    assert args.starting_height > 0
+
+    assert args.ball_radius * 2 <= resolution[0] and \
+           args.ball_radius * 2 <= resolution[1] and \
+           "Ball is larger than the resolution of the image."
+
+    if args.starting_height + args.ball_radius > resolution[1]:
+        print("WARNING: Inputted starting_height plus ball radius is greater than the height of the window.")
+
+    balls = []
+    if args.additional_ball:
+        new_args = get_input('Input new arguments as before (formatted \": --color ...\"): ').strip().split(' ')
+        if new_args[0] == '':
+            new_args = []
+
+        balls = parse_ball_args(new_args, resolution)
+
+    ball = {'color': args.color,
+            'starting_height': args.starting_height,
+            'ball_radius': args.ball_radius}
+    balls.insert(0, ball)
+
+    return balls
 
 
 if __name__ == "__main__":

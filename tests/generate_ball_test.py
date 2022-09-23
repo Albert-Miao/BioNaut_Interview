@@ -55,8 +55,7 @@ class TestHelperMethods(unittest.TestCase):
                                        '--ball_radius', '600',
                                        '--fps', '60'])
 
-    @patch('generate_ball.get_input', return_value='--color 1 2 3 --duration 8 --acceleration 10 --resolution 1280 720 '
-                                     '--starting_height 400 --ball_radius 40 --fps 10')
+    @patch('generate_ball.get_input', return_value='--color 1 2 3 --starting_height 400 --ball_radius 40')
     def test_parse_args3(self, input):
         args = parse_args(['--color', '128', '0', '64',
                            '--count_frames',
@@ -78,12 +77,8 @@ class TestHelperMethods(unittest.TestCase):
         self.assertTrue(args[0].additional_ball)
 
         self.assertTrue(args[1].color[0] == 1 and args[1].color[1] == 2 and args[1].color[2] == 3)
-        self.assertFalse(args[1].count_frames)
-        self.assertTrue(args[1].duration == 8)
-        self.assertTrue(args[1].resolution[0] == 1280 and args[1].resolution[1] == 720)
         self.assertTrue(args[1].starting_height == 400)
         self.assertTrue(args[1].ball_radius == 40)
-        self.assertTrue(args[1].fps == 10)
         self.assertFalse(args[1].additional_ball)
 
     @patch('generate_ball.get_input', return_value='')
@@ -108,10 +103,6 @@ class TestHelperMethods(unittest.TestCase):
         self.assertTrue(args[0].additional_ball)
 
         self.assertTrue(args[1].color[0] == 255 and args[1].color[1] == 255 and args[1].color[2] == 255)
-        self.assertFalse(args[1].count_frames)
-        self.assertTrue(args[1].duration == 3)
-        self.assertTrue(args[1].resolution[0] == 640 and args[1].resolution[1] == 480)
         self.assertTrue(args[1].starting_height == 400)
         self.assertTrue(args[1].ball_radius == 20)
-        self.assertTrue(args[1].fps == 30)
         self.assertFalse(args[1].additional_ball)
