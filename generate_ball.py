@@ -8,6 +8,7 @@ import argparse
 BALL_SIZE = 20
 FPS = 30
 ACCEL_TO_HEIGHT_LIMIT = 2
+PRE_SCALED_HOR_VEL = 1
 
 
 class Ball:
@@ -50,7 +51,7 @@ class Ball:
             self.max_frames = duration
             self.curr_frames = 0
 
-        self.hor_vel = 
+        self.hor_vel = PRE_SCALED_HOR_VEL
         self.ver_vel = 0
 
     def nextFrame(self):
@@ -70,6 +71,8 @@ class ScreenWriter:
 # NEED: creates ScreenWriter object, initialized with core args
 # NEED: For however long the video lasts, grab the next frame from Ball with something like nextFrame().
 #       Probably returns info of position, color, major and minor axis.
+# NEED: Store the relevant info of Ball at each frame until end.
+# NEED: Scale the horizontal distance traveled by Ball to better fit the resolution.
 # NEED: Pass relevant info to ScreenWriter and append result to images list
 # NEED: Save images.
 
