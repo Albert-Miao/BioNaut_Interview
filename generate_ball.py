@@ -7,7 +7,10 @@ import argparse
 
 
 class Ball:
-    def __init__(self, color, acceleration):
+    def __init__(self, color, acceleration, num_bounces):
+        return
+    
+    def __init__(self, color, acceleration, num_frames):
         return
 
     def nextFrame(self):
@@ -15,7 +18,7 @@ class Ball:
 
 
 class ScreenWriter:
-    def __init__(self, resolution, num_frames):
+    def __init__(self, resolution):
         return
 
     def generate_image(self):
