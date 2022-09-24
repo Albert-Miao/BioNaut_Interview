@@ -38,12 +38,12 @@ class TestHelperMethods(unittest.TestCase):
                            '--acceleration', '12',
                            '--resolution', '1920', '1080',
                            '--starting_height', '800',
-                           '--ball_radius', '200',
+                           '--radius', '200',
                            '--fps', '60'])
         balls = args['balls']
         self.assertTrue(balls[0]['color'][0] == 128 and balls[0]['color'][1] == 0 and balls[0]['color'][2] == 64)
         self.assertTrue(balls[0]['starting_height'] == 800)
-        self.assertTrue(balls[0]['ball_radius'] == 200)
+        self.assertTrue(balls[0]['radius'] == 200)
 
         self.assertTrue(args['count_frames'])
         self.assertTrue(args['duration'] == 600)
@@ -58,10 +58,10 @@ class TestHelperMethods(unittest.TestCase):
                                        '--acceleration', '12',
                                        '--resolution', '1920', '1080',
                                        '--starting_height', '800',
-                                       '--ball_radius', '600',
+                                       '--radius', '600',
                                        '--fps', '60'])
 
-    @patch('generate_ball.get_input', return_value='--color 1 2 3 --starting_height 400 --ball_radius 40')
+    @patch('generate_ball.get_input', return_value='--color 1 2 3 --starting_height 400 --radius 40')
     def test_parse_args3(self, input):
         args = parse_args(['--color', '128', '0', '64',
                            '--count_frames',
@@ -69,7 +69,7 @@ class TestHelperMethods(unittest.TestCase):
                            '--acceleration', '12',
                            '--resolution', '1920', '1080',
                            '--starting_height', '800',
-                           '--ball_radius', '200',
+                           '--radius', '200',
                            '--fps', '60',
                            '--additional_ball'])
 
@@ -77,11 +77,11 @@ class TestHelperMethods(unittest.TestCase):
 
         self.assertTrue(balls[0]['color'][0] == 128 and balls[0]['color'][1] == 0 and balls[0]['color'][2] == 64)
         self.assertTrue(balls[0]['starting_height'] == 800)
-        self.assertTrue(balls[0]['ball_radius'] == 200)
+        self.assertTrue(balls[0]['radius'] == 200)
 
         self.assertTrue(balls[1]['color'][0] == 1 and balls[1]['color'][1] == 2 and balls[1]['color'][2] == 3)
         self.assertTrue(balls[1]['starting_height'] == 400)
-        self.assertTrue(balls[1]['ball_radius'] == 40)
+        self.assertTrue(balls[1]['radius'] == 40)
 
         self.assertTrue(args['count_frames'])
         self.assertTrue(args['duration'] == 600)
@@ -96,7 +96,7 @@ class TestHelperMethods(unittest.TestCase):
                            '--acceleration', '12',
                            '--resolution', '1920', '1080',
                            '--starting_height', '800',
-                           '--ball_radius', '200',
+                           '--radius', '200',
                            '--fps', '60',
                            '--additional_ball'])
 
@@ -104,13 +104,17 @@ class TestHelperMethods(unittest.TestCase):
 
         self.assertTrue(balls[0]['color'][0] == 128 and balls[0]['color'][1] == 0 and balls[0]['color'][2] == 64)
         self.assertTrue(balls[0]['starting_height'] == 800)
-        self.assertTrue(balls[0]['ball_radius'] == 200)
+        self.assertTrue(balls[0]['radius'] == 200)
 
         self.assertTrue(balls[1]['color'][0] == 255 and balls[1]['color'][1] == 255 and balls[1]['color'][2] == 255)
         self.assertTrue(balls[1]['starting_height'] == 400)
-        self.assertTrue(balls[1]['ball_radius'] == 20)
+        self.assertTrue(balls[1]['radius'] == 20)
 
         self.assertTrue(args['count_frames'])
         self.assertTrue(args['duration'] == 600)
         self.assertTrue(args['resolution'][0] == 1920 and args['resolution'][1] == 1080)
         self.assertTrue(args['fps'] == 60)
+
+
+if __name__ == '__main__':
+    unittest.main()
