@@ -64,12 +64,12 @@ class Ball:
 class ScreenWriter:
     # Initializes ScreenWriter. Only takes in resolution, a 2-dim tuple of positive integers.
     def __init__(self, resolution):
-        assert type(resolution) is list and len(resolution) == 2
+        assert (type(resolution) is list or type(resolution) is tuple) and len(resolution) == 2
         assert type(resolution[0]) is int and type(resolution[1]) is int
         assert resolution[0] > 0 and resolution[1] > 0
 
         self.resolution = resolution
-        self.curr_display = np.zeroes((resolution[0], resolution[1], 3))
+        self.curr_display = np.zeros((resolution[0], resolution[1], 3))
         return
 
     def generate_image(self):

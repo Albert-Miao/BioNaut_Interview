@@ -3,6 +3,8 @@ from generate_ball import *
 import unittest
 from unittest.mock import patch
 
+import numpy as np
+
 
 class TestBallMethods(unittest.TestCase):
     def test_init(self):
@@ -28,6 +30,15 @@ class TestBallMethods(unittest.TestCase):
         self.assertTrue(hasattr(ball, 'ver_vel'))
         self.assertTrue(ball.hor_vel == PRE_SCALED_HOR_VEL)
         self.assertTrue(ball.ver_vel == 0)
+        
+        
+class TestScreenWriterMethods(unittest.TestCase):
+    def test_init(self):
+        screenwriter = ScreenWriter((1280, 720))
+
+        self.assertTrue(screenwriter.resolution[0] == 1280 and screenwriter.resolution[1] == 720)
+        test_display = np.zeros((1280, 720, 3))
+        self.assertTrue(np.all(screenwriter.curr_display == test_display))
 
 
 class TestHelperMethods(unittest.TestCase):
