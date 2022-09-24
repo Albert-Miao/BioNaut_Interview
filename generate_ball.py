@@ -62,7 +62,14 @@ class Ball:
 
 
 class ScreenWriter:
+    # Initializes ScreenWriter. Only takes in resolution, a 2-dim tuple of positive integers.
     def __init__(self, resolution):
+        assert type(resolution) is list and len(resolution) == 2
+        assert type(resolution[0]) is int and type(resolution[1]) is int
+        assert resolution[0] > 0 and resolution[1] > 0
+
+        self.resolution = resolution
+        self.curr_display = np.zeroes((resolution[0], resolution[1], 3))
         return
 
     def generate_image(self):
@@ -84,6 +91,10 @@ def main():
     args = parse_args(sys.argv[1:])
     ball_args = args['balls']
     print('Number of balls: ' + str(len(ball_args)))
+    
+    balls = []
+    for ball_arg in ball_args:
+        balls.append(Ball(ball_arg, args['acceleration'], args['duration'], args['count_frames']))
 
     return
 
