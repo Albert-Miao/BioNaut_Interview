@@ -12,18 +12,12 @@ PRE_SCALED_HOR_VEL = 1
 
 class Ball:
     # Initializes Ball with color as an RGB tuple, ball radius, & starting height in px, all in a dictionary.
-    # Store duration in either number of frames or bounces, and a boolean determining whether to count by bounces or
-    # frames. Also initializes velocity and acceleration.
     #
     # ball_attr is a dictionary with keys ['color', 'radius', 'starting_height']
     #   'color': A 3-dim tuple of integers between 0 and 255
     #   'radius': A positive float larger than 0.5
     #   'starting_height': A positive float greater than radius.
-    #
-    # acceleration should be a positive value.
-    # duration should a positive integer regardless of frames or bounces.
-    # bounces_or_frames = True when counting bounces, False when counting frames.
-    def __init__(self, ball_attr, acceleration, duration, count_frames):
+    def __init__(self, ball_attr):
         assert type(ball_attr['color']) is list and len(ball_attr['color']) == 3
         assert type(ball_attr['color'][0]) is int and \
                type(ball_attr['color'][1]) is int and \
@@ -32,27 +26,11 @@ class Ball:
                0 <= ball_attr['color'][1] <= 255 and \
                0 <= ball_attr['color'][2] <= 255
 
-        assert type(acceleration) is float or type(acceleration) is int
-        assert acceleration > 0
-
         assert type(ball_attr['starting_height']) is float or type(ball_attr['starting_height']) is int
         assert ball_attr['starting_height'] > 0
 
-        assert type(count_frames) is bool
-        assert type(duration) is int
-
-        # Initialize Ball values
         self.color = ball_attr['color']
-        self.acceleration = acceleration
         self.height = ball_attr['starting_height']
-        self.count_bounces = count_frames
-
-        if self.count_bounces:
-            self.max_frames = duration
-            self.curr_frames = 0
-        else:
-            self.max_bounces = duration
-            self.curr_bounces = 0
 
         self.hor_vel = PRE_SCALED_HOR_VEL
         self.ver_vel = 0
@@ -61,12 +39,48 @@ class Ball:
         return tuple()
 
 
+# Create a separate BallManager class because there are many attributes that are shared between balls, thus making it
+# redundant in the Ball class, that are also relevant to trajectory calculation, making it different from the
+# ScreenWriter class.
+class BallManager:
+    # Initializes BallManager with duration in either number of frames or bounces, a boolean determining whether to
+    # count by bounces or frames, and acceleration.
+    #
+    # acceleration should be a positive value.
+    # duration should a positive integer regardless of frames or bounces.
+    # bounces_or_frames = True when counting bounces, False when counting frames.
+    def __init__(self, acceleration, duration, count_frames, fps, balls=None):
+        if balls is None:
+            balls = []
+
+        assert type(acceleration) is float or type(acceleration) is int
+        assert acceleration > 0
+
+        assert type(count_frames) is bool
+        assert type(duration) is int
+
+        self.acceleration = acceleration
+        self.count_bounces = count_frames
+        if self.count_bounces:
+            self.max_frames = duration
+            self.curr_frames = 0
+        else:
+            self.max_bounces = duration
+            self.curr_bounces = 0
+
+        self.fps = fps
+        self.balls = balls
+
+
 class ScreenWriter:
-    # Initializes ScreenWriter. Only takes in resolution, a 2-dim tuple of positive integers.
-    def __init__(self, resolution):
+    # Initializes ScreenWriter. Only takes in resolution, a 2-dim tuple of positive integers, and fps, a positive
+    # integer.
+    def __init__(self, resolution, fps):
         assert (type(resolution) is list or type(resolution) is tuple) and len(resolution) == 2
         assert type(resolution[0]) is int and type(resolution[1]) is int
         assert resolution[0] > 0 and resolution[1] > 0
+
+        assert type(fps) is int and fps > 0
 
         self.resolution = resolution
         self.curr_display = np.zeros((resolution[0], resolution[1], 3))
@@ -77,8 +91,8 @@ class ScreenWriter:
 
 
 # DONE: creates argparse object and passes to parse_args function
-# NEED: creates Ball object to be run, initialized with core args
-# NEED: creates ScreenWriter object, initialized with core args
+# DONE: creates Ball object to be run, initialized with core args
+# DONE: creates ScreenWriter object, initialized with core args
 # NEED: For however long the video lasts, grab the next frame from Ball with something like nextFrame().
 #       Probably returns info of position, color, major and minor axis.
 # NEED: Store the relevant info of Ball at each frame until end.
@@ -91,10 +105,12 @@ def main():
     args = parse_args(sys.argv[1:])
     ball_args = args['balls']
     print('Number of balls: ' + str(len(ball_args)))
-    
+
     balls = []
     for ball_arg in ball_args:
-        balls.append(Ball(ball_arg, args['acceleration'], args['duration'], args['count_frames']))
+        balls.append(Ball(ball_arg))
+
+    manager = BallManager(args['acceleration'], args['duration'], args['count_frames'], args['fps'], balls)
 
     return
 
