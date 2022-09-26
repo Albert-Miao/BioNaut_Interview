@@ -57,7 +57,9 @@ class Ball:
             if self.y + y_delta <= self.radius:
 
                 # Determine impact speed
-                impact_vel = -((self.ver_vel ** 2 + 2 * acceleration * (self.y - self.radius)) ** (1 / 2))
+                vel_dir = np.sign(self.ver_vel)
+                impact_vel = vel_dir * (((self.ver_vel ** 2) +
+                                         vel_dir * 2 * acceleration * (self.y - self.radius)) ** (1 / 2))
 
                 # Determine length of time til impact and set x and y accordingly.
                 curr_step = (impact_vel - self.ver_vel) / acceleration
@@ -67,7 +69,7 @@ class Ball:
                 # If there is deformation to the ball, determine the resulting acceleration of the center position from
                 # impact speed and the given deformation constant.
                 if self.deformation != 0:
-                    self.deformation_acceleration = (impact_vel ** 2 - self.ver_vel ** 2) / (2 * (self.radius - 1))
+                    self.deformation_acceleration = (impact_vel ** 2) / (2 * (self.radius - 1))
                     self.deformation_acceleration = self.deformation_acceleration / self.deformation
 
                     self.ver_vel = impact_vel
@@ -96,6 +98,7 @@ class Ball:
 
                 self.x += curr_step * self.hor_vel
                 self.y = self.radius
+                self.ver_vel = escape_vel
                 return self.nextFrame(acceleration, step - curr_step)[0], True
 
             # If not leaving impact, predict values with deformation_acceleration.
@@ -103,11 +106,14 @@ class Ball:
             self.y += y_delta
             self.ver_vel += self.deformation_acceleration * step
 
+        minor = min(self.y, self.radius)
+        major = (self.radius ** 2) / minor
+
         ball_info = {
             'x': self.x,
             'y': self.y,
-            'major': self.radius,
-            'minor': self.radius,
+            'major': major,
+            'minor': minor,
             'color': self.color
         }
 
@@ -234,7 +240,6 @@ def main():
         cv2.imshow('test', img)
         cv2.waitKey(1)
 
-
     return
 
 
@@ -247,7 +252,7 @@ def parse_args(args):
                         help='Starting height of the ball in pixels.')
     parser.add_argument('--radius', dest='radius', type=float, default=20.,
                         help='Radius of the ball in pixels. Ball must be able to fit within given window.')
-    parser.add_argument('--deformation', dest='deformation', type=float, default=0.0,
+    parser.add_argument('--deformation', dest='deformation', type=float, default=0.3,
                         help='Deformation of the ball, between 0 and 1. 0 is no deformation, 1 is the most.')
 
     parser.add_argument('--count_frames', dest='count_frames', action='store_true',
