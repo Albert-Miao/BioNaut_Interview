@@ -14,24 +14,31 @@ class TestBallMethods(unittest.TestCase):
             'starting_height': 300
         }
 
-        ball = Ball(ball_attr, 9.81, 5, False)
+        ball = Ball(ball_attr)
 
         self.assertTrue(ball.color[0] == 127 and ball.color[1] == 100 and ball.color[2] == 156)
-        self.assertTrue(ball.acceleration == 9.81)
         self.assertTrue(ball.height == 300)
-        self.assertTrue(not ball.count_bounces)
-
-        self.assertTrue(hasattr(ball, 'max_bounces'))
-        self.assertTrue(hasattr(ball, 'curr_bounces'))
-        self.assertTrue(not hasattr(ball, 'max_frames') and not hasattr(ball, 'curr_frames'))
-        self.assertTrue(ball.max_bounces == 5)
 
         self.assertTrue(hasattr(ball, 'hor_vel'))
         self.assertTrue(hasattr(ball, 'ver_vel'))
         self.assertTrue(ball.hor_vel == PRE_SCALED_HOR_VEL)
         self.assertTrue(ball.ver_vel == 0)
-        
-        
+
+
+class TestBallManagerMethods(unittest.TestCase):
+    def test_init(self):
+        manager = BallManager(9.81, 5, False, fps=60)
+
+        self.assertTrue(manager.acceleration == 9.81)
+        self.assertFalse(manager.count_bounces)
+
+        self.assertTrue(hasattr(manager, 'max_bounces'))
+        self.assertTrue(hasattr(manager, 'curr_bounces'))
+        self.assertFalse(hasattr(manager, 'max_frames') or hasattr(manager, 'curr_frames'))
+        self.assertTrue(manager.max_bounces == 5)
+        self.assertTrue(len(manager.balls) == 0)
+
+
 class TestScreenWriterMethods(unittest.TestCase):
     def test_init(self):
         screenwriter = ScreenWriter((1280, 720))
