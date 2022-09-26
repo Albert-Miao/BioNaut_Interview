@@ -17,6 +17,7 @@ class TestBallMethods(unittest.TestCase):
         ball = Ball(ball_attr)
 
         self.assertTrue(ball.color[0] == 127 and ball.color[1] == 100 and ball.color[2] == 156)
+        self.assertTrue(ball.radius == 10)
         self.assertTrue(ball.height == 300)
 
         self.assertTrue(hasattr(ball, 'hor_vel'))
@@ -26,7 +27,7 @@ class TestBallMethods(unittest.TestCase):
 
 
 class TestBallManagerMethods(unittest.TestCase):
-    def test_init(self):
+    def test_init1(self):
         manager = BallManager(9.81, 5, False, fps=60)
 
         self.assertTrue(manager.acceleration == 9.81)
@@ -37,6 +38,36 @@ class TestBallManagerMethods(unittest.TestCase):
         self.assertFalse(hasattr(manager, 'max_frames') or hasattr(manager, 'curr_frames'))
         self.assertTrue(manager.max_bounces == 5)
         self.assertTrue(len(manager.balls) == 0)
+
+    def test_init2(self):
+        ball_attr1 = {
+            'color': [127, 100, 156],
+            'radius': 10,
+            'starting_height': 300
+        }
+
+        ball_attr2 = {
+            'color': [1, 2, 3],
+            'radius': 5,
+            'starting_height': 100
+        }
+
+        balls = [Ball(ball_attr1), Ball(ball_attr2)]
+
+        manager = BallManager(9.81, 5, False, 60, balls)
+
+        self.assertTrue(manager.balls[0].color[0] == 127 and
+                        manager.balls[0].color[1] == 100 and
+                        manager.balls[0].color[2] == 156)
+        self.assertTrue(manager.balls[0].radius == 10)
+        self.assertTrue(manager.balls[0].height == 300)
+
+        self.assertTrue(manager.balls[1].color[0] == 1 and
+                        manager.balls[1].color[1] == 2 and
+                        manager.balls[1].color[2] == 3)
+        self.assertTrue(manager.balls[1].radius == 5)
+        self.assertTrue(manager.balls[1].height == 100)
+
 
 
 class TestScreenWriterMethods(unittest.TestCase):

@@ -26,10 +26,14 @@ class Ball:
                0 <= ball_attr['color'][1] <= 255 and \
                0 <= ball_attr['color'][2] <= 255
 
+        assert type(ball_attr['radius'] is float or type(ball_attr['radius'] is int))
+        assert ball_attr['radius'] > 0.5
+
         assert type(ball_attr['starting_height']) is float or type(ball_attr['starting_height']) is int
         assert ball_attr['starting_height'] > 0
 
         self.color = ball_attr['color']
+        self.radius = ball_attr['radius']
         self.height = ball_attr['starting_height']
 
         self.hor_vel = PRE_SCALED_HOR_VEL
