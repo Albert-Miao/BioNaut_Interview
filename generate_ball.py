@@ -141,6 +141,8 @@ def parse_args(args):
                         help='Starting height of the ball in pixels.')
     parser.add_argument('--radius', dest='radius', type=float, default=20.,
                         help='Radius of the ball in pixels. Ball must be able to fit within given window.')
+    parser.add_argument('--deformation', dest='deformation', type=float, default=0.0,
+                        help='Deformation of the ball, between 0 and 1. 0 is no deformation, 1 is the most.')
 
     parser.add_argument('--count_frames', dest='count_frames', action='store_true',
                         help='Whether to determine video length by number of frames. If not, determined by number of '
@@ -162,6 +164,7 @@ def parse_args(args):
     assert 0 <= args.color[0] <= 255 and 0 <= args.color[1] <= 255 and 0 <= args.color[2] <= 255
     assert args.radius > 0.5
     assert args.starting_height > 0
+    assert 0 <= args.deformation <= 1
 
     assert args.duration > 0
     assert args.acceleration > 0
@@ -195,7 +198,8 @@ def parse_args(args):
     ball = {
         'color': args.color,
         'starting_height': args.starting_height,
-        'radius': args.radius
+        'radius': args.radius,
+        'deformation': args.deformation
     }
 
     output_args = {
@@ -223,6 +227,8 @@ def parse_ball_args(args, resolution):
                         help='Starting height of the ball in pixels.')
     parser.add_argument('--radius', dest='radius', type=float, default=20.,
                         help='Radius of the ball in pixels. Ball must be able to fit within given window.')
+    parser.add_argument('--deformation', dest='deformation', type=float, default=0.0,
+                        help='Deformation of the ball, between 0 and 1. 0 is no deformation, 1 is the most.')
     parser.add_argument('--additional_ball', dest='additional_ball', action='store_true',
                         help='Input values for another ball after this one.')
 
@@ -232,6 +238,7 @@ def parse_ball_args(args, resolution):
     assert 0 <= args.color[0] <= 255 and 0 <= args.color[1] <= 255 and 0 <= args.color[2] <= 255
     assert args.radius > 0.5
     assert args.starting_height > 0
+    assert 0 <= args.deformation <= 1
 
     assert args.radius * 2 <= resolution[0] and \
            args.radius * 2 <= resolution[1] and \
@@ -251,7 +258,8 @@ def parse_ball_args(args, resolution):
     ball = {
         'color': args.color,
         'starting_height': args.starting_height,
-        'radius': args.radius
+        'radius': args.radius,
+        'deformation': args.deformation
     }
     balls.insert(0, ball)
 
