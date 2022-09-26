@@ -11,7 +11,8 @@ class TestBallMethods(unittest.TestCase):
         ball_attr = {
             'color': [127, 100, 156],
             'radius': 10,
-            'starting_height': 300
+            'starting_height': 300,
+            'deformation': 0
         }
 
         ball = Ball(ball_attr)
@@ -19,6 +20,7 @@ class TestBallMethods(unittest.TestCase):
         self.assertTrue(ball.color[0] == 127 and ball.color[1] == 100 and ball.color[2] == 156)
         self.assertTrue(ball.radius == 10)
         self.assertTrue(ball.height == 300)
+        self.assertTrue(ball.deformation == 0)
 
         self.assertTrue(hasattr(ball, 'hor_vel'))
         self.assertTrue(hasattr(ball, 'ver_vel'))
@@ -43,13 +45,15 @@ class TestBallManagerMethods(unittest.TestCase):
         ball_attr1 = {
             'color': [127, 100, 156],
             'radius': 10,
-            'starting_height': 300
+            'starting_height': 300,
+            'deformation': 0
         }
 
         ball_attr2 = {
             'color': [1, 2, 3],
             'radius': 5,
-            'starting_height': 100
+            'starting_height': 100,
+            'deformation': 0.4
         }
 
         balls = [Ball(ball_attr1), Ball(ball_attr2)]
@@ -61,20 +65,22 @@ class TestBallManagerMethods(unittest.TestCase):
                         manager.balls[0].color[2] == 156)
         self.assertTrue(manager.balls[0].radius == 10)
         self.assertTrue(manager.balls[0].height == 300)
+        self.assertTrue(manager.balls[0].deformation == 0)
 
         self.assertTrue(manager.balls[1].color[0] == 1 and
                         manager.balls[1].color[1] == 2 and
                         manager.balls[1].color[2] == 3)
         self.assertTrue(manager.balls[1].radius == 5)
         self.assertTrue(manager.balls[1].height == 100)
-
+        self.assertTrue(manager.balls[1].deformation == 0.4)
 
 
 class TestScreenWriterMethods(unittest.TestCase):
     def test_init(self):
-        screenwriter = ScreenWriter((1280, 720))
+        screenwriter = ScreenWriter((1280, 720), 60)
 
         self.assertTrue(screenwriter.resolution[0] == 1280 and screenwriter.resolution[1] == 720)
+        self.assertTrue(screenwriter.fps == 60)
         test_display = np.zeros((1280, 720, 3))
         self.assertTrue(np.all(screenwriter.curr_display == test_display))
 

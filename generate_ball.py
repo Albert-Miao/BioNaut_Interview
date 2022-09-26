@@ -17,6 +17,7 @@ class Ball:
     #   'color': A 3-dim tuple of integers between 0 and 255
     #   'radius': A positive float larger than 0.5
     #   'starting_height': A positive float greater than radius.
+    #   'deformation': A positive float from 0 to 1.
     def __init__(self, ball_attr):
         assert type(ball_attr['color']) is list and len(ball_attr['color']) == 3
         assert type(ball_attr['color'][0]) is int and \
@@ -32,9 +33,13 @@ class Ball:
         assert type(ball_attr['starting_height']) is float or type(ball_attr['starting_height']) is int
         assert ball_attr['starting_height'] > 0
 
+        assert type(ball_attr['deformation'] is float or type(ball_attr['deformation'] is int))
+        assert 0 <= ball_attr['deformation'] <= 1
+
         self.color = ball_attr['color']
         self.radius = ball_attr['radius']
         self.height = ball_attr['starting_height']
+        self.deformation = ball_attr['deformation']
 
         self.hor_vel = PRE_SCALED_HOR_VEL
         self.ver_vel = 0
@@ -75,6 +80,9 @@ class BallManager:
         self.fps = fps
         self.balls = balls
 
+    def nextFrame(self):
+        return [], 0
+
 
 class ScreenWriter:
     # Initializes ScreenWriter. Only takes in resolution, a 2-dim tuple of positive integers, and fps, a positive
@@ -88,6 +96,7 @@ class ScreenWriter:
 
         self.resolution = resolution
         self.curr_display = np.zeros((resolution[0], resolution[1], 3))
+        self.fps = fps
         return
 
     def generate_image(self):
@@ -96,6 +105,7 @@ class ScreenWriter:
 
 # DONE: creates argparse object and passes to parse_args function
 # DONE: creates Ball object to be run, initialized with core args
+# DONE: creates BallManager object with all relevant balls.
 # DONE: creates ScreenWriter object, initialized with core args
 # NEED: For however long the video lasts, grab the next frame from Ball with something like nextFrame().
 #       Probably returns info of position, color, major and minor axis.
@@ -115,6 +125,9 @@ def main():
         balls.append(Ball(ball_arg))
 
     manager = BallManager(args['acceleration'], args['duration'], args['count_frames'], args['fps'], balls)
+    screenwriter = ScreenWriter(args['resolution'], args['fps'])
+
+
 
     return
 
