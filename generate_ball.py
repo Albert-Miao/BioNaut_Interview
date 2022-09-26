@@ -44,7 +44,7 @@ class Ball:
         self.hor_vel = PRE_SCALED_HOR_VEL
         self.ver_vel = 0
 
-    def nextFrame(self):
+    def nextFrame(self, step):
         return tuple()
 
 
@@ -57,7 +57,8 @@ class BallManager:
     #
     # acceleration should be a positive value.
     # duration should a positive integer regardless of frames or bounces.
-    # bounces_or_frames = True when counting bounces, False when counting frames.
+    # count_frames = True when counting bounces, False when counting frames.
+    # fps is a positive integer
     def __init__(self, acceleration, duration, count_frames, fps, balls=None):
         if balls is None:
             balls = []
@@ -69,19 +70,33 @@ class BallManager:
         assert type(duration) is int
 
         self.acceleration = acceleration
-        self.count_bounces = count_frames
-        if self.count_bounces:
+        self.count_frames = count_frames
+        if self.count_frames:
             self.max_frames = duration
             self.curr_frames = 0
         else:
             self.max_bounces = duration
-            self.curr_bounces = 0
+            self.curr_bounces = [0] * len(balls)
 
         self.fps = fps
         self.balls = balls
 
     def nextFrame(self):
-        return [], 0
+        ball_info = []
+        finished = False
+        if self.count_frames:
+            self.curr_frames += 1
+            if self.curr_frames >= self.max_frames:
+                finished = True
+
+        for i, ball in enumerate(self.balls):
+            ball_info.append(ball.nextFrame(1/self.fps))
+            if not self.count_frames and ball['bounced']:
+                self.curr_bounces[i] += 1
+                if self.curr_bounces[i] >= self.max_bounces and self.balls[i].ver_vel < 0:
+                    finished = True
+
+        return [], finished
 
 
 class ScreenWriter:
@@ -183,6 +198,8 @@ def parse_args(args):
            "Ball is larger than the resolution of the image."
 
     assert args.starting_height - args.radius > 0 and 'Ball cannot start below or on the ground.'
+    assert fps > (args.starting_height * 2 / acceleration) * (-1/2) and \
+           "Ball falls too quickly to the ground for the given fps."
 
     if args.starting_height + args.radius > resolution[1]:
         print("WARNING: Inputted starting_height plus ball radius is greater than the height of the window.")

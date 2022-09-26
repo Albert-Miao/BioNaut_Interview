@@ -119,8 +119,20 @@ class TestHelperMethods(unittest.TestCase):
                                        '--radius', '600',
                                        '--fps', '60'])
 
+    def test_parse_args3(self):
+        self.assertRaises(AssertionError,
+                          parse_args, ['--color', '128', '0', '64',
+                                       '--count_frames',
+                                       '--duration', '600',
+                                       '--acceleration', '50',
+                                       '--deformation', '0.45',
+                                       '--resolution', '1920', '1080',
+                                       '--starting_height', '10',
+                                       '--radius', '200',
+                                       '--fps', '1'])
+
     @patch('generate_ball.get_input', return_value='--color 1 2 3 --starting_height 400 --radius 40 --deformation 0.2')
-    def test_parse_args3(self, input):
+    def test_parse_args4(self, input):
         args = parse_args(['--color', '128', '0', '64',
                            '--count_frames',
                            '--duration', '600',
@@ -150,7 +162,7 @@ class TestHelperMethods(unittest.TestCase):
         self.assertTrue(args['fps'] == 60)
 
     @patch('generate_ball.get_input', return_value='')
-    def test_parse_args4(self, input):
+    def test_parse_args5(self, input):
         args = parse_args(['--color', '128', '0', '64',
                            '--count_frames',
                            '--duration', '600',
