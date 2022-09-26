@@ -19,7 +19,8 @@ class TestBallMethods(unittest.TestCase):
 
         self.assertTrue(ball.color[0] == 127 and ball.color[1] == 100 and ball.color[2] == 156)
         self.assertTrue(ball.radius == 10)
-        self.assertTrue(ball.height == 300)
+        self.assertTrue(ball.x == 0)
+        self.assertTrue(ball.y == 300)
         self.assertTrue(ball.deformation == 0)
 
         self.assertTrue(hasattr(ball, 'hor_vel'))
@@ -33,7 +34,7 @@ class TestBallManagerMethods(unittest.TestCase):
         manager = BallManager(9.81, 5, False, fps=60)
 
         self.assertTrue(manager.acceleration == 9.81)
-        self.assertFalse(manager.count_bounces)
+        self.assertFalse(manager.count_frames)
 
         self.assertTrue(hasattr(manager, 'max_bounces'))
         self.assertTrue(hasattr(manager, 'curr_bounces'))
@@ -64,14 +65,16 @@ class TestBallManagerMethods(unittest.TestCase):
                         manager.balls[0].color[1] == 100 and
                         manager.balls[0].color[2] == 156)
         self.assertTrue(manager.balls[0].radius == 10)
-        self.assertTrue(manager.balls[0].height == 300)
+        self.assertTrue(manager.balls[0].x == 0)
+        self.assertTrue(manager.balls[0].y == 300)
         self.assertTrue(manager.balls[0].deformation == 0)
 
         self.assertTrue(manager.balls[1].color[0] == 1 and
                         manager.balls[1].color[1] == 2 and
                         manager.balls[1].color[2] == 3)
         self.assertTrue(manager.balls[1].radius == 5)
-        self.assertTrue(manager.balls[1].height == 100)
+        self.assertTrue(manager.balls[1].x == 0)
+        self.assertTrue(manager.balls[1].y == 100)
         self.assertTrue(manager.balls[1].deformation == 0.4)
 
 

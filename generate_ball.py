@@ -38,11 +38,13 @@ class Ball:
 
         self.color = ball_attr['color']
         self.radius = ball_attr['radius']
-        self.height = ball_attr['starting_height']
         self.deformation = ball_attr['deformation']
 
         self.hor_vel = PRE_SCALED_HOR_VEL
         self.ver_vel = 0
+
+        self.x = 0
+        self.y = ball_attr['starting_height']
 
     def nextFrame(self, step):
         return tuple()
