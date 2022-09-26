@@ -42,17 +42,75 @@ class Ball:
 
         self.hor_vel = PRE_SCALED_HOR_VEL
         self.ver_vel = 0
+        self.deformation_acceleration = -1
 
         self.x = 0
         self.y = ball_attr['starting_height']
 
     def nextFrame(self, acceleration, step):
-        self.x += self.hor_vel * step
 
-        # y_delta = self.ver_vel * step + (1/2) * -acceleration * (step ** 2)
-        #
-        # # Impact occurs when the expected y is below the ground:
-        # if self.y + y_delta < self.radius:
+        # Check to see if ball is not in impact
+        if self.y > self.radius or (self.y == self.radius and self.ver_vel > 0):
+            # Predict change in y
+            y_delta = self.ver_vel * step + (1 / 2) * acceleration * (step ** 2)
+            # Impact occurs when the expected y is below the ground:
+            if self.y + y_delta <= self.radius:
+
+                # Determine impact speed
+                impact_vel = (self.ver_vel ** 2 + 2 * acceleration * (self.y - self.radius)) ** (1 / 2)
+
+                # Determine length of time til impact and set x and y accordingly.
+                curr_step = (impact_vel - self.ver_vel) / acceleration
+                self.x += curr_step * self.hor_vel
+                self.y = self.radius
+
+                # If there is deformation to the ball, determine the resulting acceleration of the center position from
+                # impact speed and the given deformation constant.
+                if self.deformation != 0:
+                    self.deformation_acceleration = (impact_vel ** 2 - self.ver_vel ** 2) / (2 * (self.radius - 1))
+                    self.deformation_acceleration = self.deformation_acceleration / self.deformation
+
+                    self.ver_vel = impact_vel
+
+                    # Calculate the remainder of the timestep.
+                    return self.nextFrame(acceleration, step - curr_step)
+
+                # If there is no deformation, calculate the remainder of the timestep after the vertical velocity is
+                # completely reversed.
+                self.ver_vel = -impact_vel
+                return self.nextFrame(acceleration, step - curr_step)[0], True
+
+            # If no expected impact, predict values as normal.
+            self.x += step * self.hor_vel
+            self.y += y_delta
+            self.ver_vel += acceleration * step
+
+        # If in the middle of impact, make calculations as per deformation_acceleration.
+        else:
+            y_delta = self.ver_vel * step + (1 / 2) * self.deformation_acceleration * (step ** 2)
+
+            # If leaving impact, calculate rest with gravity acceleration.
+            if self.y + y_delta >= self.radius:
+                escape_vel = (self.ver_vel ** 2 + 2 * self.deformation_acceleration * (self.radius - self.y)) ** (1 / 2)
+                curr_step = (escape_vel - self.ver_vel) / self.deformation_acceleration
+
+                self.x += curr_step * self.hor_vel
+                self.y = self.radius
+                return self.nextFrame(acceleration, step - curr_step)[0], True
+
+            # If not leaving impact, predict values with deformation_acceleration.
+            self.x += step * self.hor_vel
+            self.y += y_delta
+            self.ver_vel += self.deformation_acceleration * step
+
+        ball_info = {
+            'x': self.x,
+            'y': self.y,
+            'major': self.radius,
+            'minor': self.radius
+        }
+
+        return ball_info, False
 
 
 # Create a separate BallManager class because there are many attributes that are shared between balls, thus making it
@@ -89,7 +147,7 @@ class BallManager:
         self.balls = balls
 
     def nextFrame(self):
-        ball_info = []
+        balls_info = []
         finished = False
 
         # If counting frames, return finished if max_frames is surpassed.
@@ -100,11 +158,12 @@ class BallManager:
 
         # Iterate though each ball and store info.
         for i, ball in enumerate(self.balls):
-            ball_info.append(ball.nextFrame(self.acceleration, 1/self.fps))
+            ball_info, bounced = ball.nextFrame(-self.acceleration, 1 / self.fps)
+            balls_info.append(ball_info)
 
             # If the ball bounced in the last frame, record it, and then return finished when a ball that has reached
             # max bounces reaches its peak.
-            if not self.count_frames and ball['bounced']:
+            if not self.count_frames and bounced:
                 self.curr_bounces[i] += 1
                 if self.curr_bounces[i] >= self.max_bounces and self.balls[i].ver_vel < 0:
                     finished = True
@@ -154,8 +213,6 @@ def main():
 
     manager = BallManager(args['acceleration'], args['duration'], args['count_frames'], args['fps'], balls)
     screenwriter = ScreenWriter(args['resolution'], args['fps'])
-
-
 
     return
 
@@ -211,7 +268,7 @@ def parse_args(args):
            "Ball is larger than the resolution of the image."
 
     assert args.starting_height - args.radius > 0 and 'Ball cannot start below or on the ground.'
-    assert fps > (args.starting_height * 2 / acceleration) * (-1/2) and \
+    assert fps > (args.starting_height * 2 / acceleration) * (-1 / 2) and \
            "Ball falls too quickly to the ground for the given fps."
 
     if args.starting_height + args.radius > resolution[1]:

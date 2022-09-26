@@ -22,6 +22,7 @@ class TestBallMethods(unittest.TestCase):
         self.assertTrue(ball.x == 0)
         self.assertTrue(ball.y == 300)
         self.assertTrue(ball.deformation == 0)
+        self.assertTrue(ball.deformation_acceleration == -1)
 
         self.assertTrue(hasattr(ball, 'hor_vel'))
         self.assertTrue(hasattr(ball, 'ver_vel'))
@@ -68,6 +69,7 @@ class TestBallManagerMethods(unittest.TestCase):
         self.assertTrue(manager.balls[0].x == 0)
         self.assertTrue(manager.balls[0].y == 300)
         self.assertTrue(manager.balls[0].deformation == 0)
+        self.assertTrue(manager.balls[0].deformation_acceleration == -1)
 
         self.assertTrue(manager.balls[1].color[0] == 1 and
                         manager.balls[1].color[1] == 2 and
@@ -76,6 +78,7 @@ class TestBallManagerMethods(unittest.TestCase):
         self.assertTrue(manager.balls[1].x == 0)
         self.assertTrue(manager.balls[1].y == 100)
         self.assertTrue(manager.balls[1].deformation == 0.4)
+        self.assertTrue(manager.balls[1].deformation_acceleration == -1)
 
 
 class TestScreenWriterMethods(unittest.TestCase):
