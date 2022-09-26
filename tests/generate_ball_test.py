@@ -12,7 +12,8 @@ class TestBallMethods(unittest.TestCase):
             'color': [127, 100, 156],
             'radius': 10,
             'starting_height': 300,
-            'deformation': 0
+            'deformation': 0,
+            'hor_vel': 20
         }
 
         ball = Ball(ball_attr)
@@ -26,7 +27,7 @@ class TestBallMethods(unittest.TestCase):
 
         self.assertTrue(hasattr(ball, 'hor_vel'))
         self.assertTrue(hasattr(ball, 'ver_vel'))
-        self.assertTrue(ball.hor_vel == PRE_SCALED_HOR_VEL)
+        self.assertTrue(ball.hor_vel == 20)
         self.assertTrue(ball.ver_vel == 0)
 
 
@@ -48,14 +49,16 @@ class TestBallManagerMethods(unittest.TestCase):
             'color': [127, 100, 156],
             'radius': 10,
             'starting_height': 300,
-            'deformation': 0
+            'deformation': 0,
+            'hor_vel': 20
         }
 
         ball_attr2 = {
             'color': [1, 2, 3],
             'radius': 5,
             'starting_height': 100,
-            'deformation': 0.4
+            'deformation': 0.4,
+            'hor_vel': 10
         }
 
         balls = [Ball(ball_attr1), Ball(ball_attr2)]

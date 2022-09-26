@@ -40,11 +40,11 @@ class Ball:
         self.radius = ball_attr['radius']
         self.deformation = ball_attr['deformation']
 
-        self.hor_vel = PRE_SCALED_HOR_VEL
+        self.hor_vel = ball_attr['hor_vel']
         self.ver_vel = 0
         self.deformation_acceleration = -1
 
-        self.x = 0
+        self.x = self.radius
         self.y = ball_attr['starting_height']
 
     def nextFrame(self, acceleration, step):
@@ -172,7 +172,7 @@ class BallManager:
             # max bounces reaches its peak.
             if not self.count_frames and bounced:
                 self.curr_bounces[i] += 1
-            if self.curr_bounces[i] >= self.max_bounces and self.balls[i].ver_vel < 0:
+            if not self.count_frames and self.curr_bounces[i] >= self.max_bounces and self.balls[i].ver_vel < 0:
                 finished = True
 
         return balls_info, finished
@@ -211,10 +211,10 @@ class ScreenWriter:
 # DONE: creates Ball object to be run, initialized with core args
 # DONE: creates BallManager object with all relevant balls.
 # DONE: creates ScreenWriter object, initialized with core args
+# NEED: Predict horizontal scale
 # NEED: For however long the video lasts, grab the next frame from Ball with something like nextFrame().
 #       Probably returns info of position, color, major and minor axis.
 # NEED: Store the relevant info of Ball at each frame until end.
-# NEED: Scale the horizontal distance traveled by Ball to better fit the resolution.
 # NEED: Pass relevant info to ScreenWriter and append result to images list
 # NEED: Save images.
 
@@ -224,12 +224,48 @@ def main():
     ball_args = args['balls']
     print('Number of balls: ' + str(len(ball_args)))
 
+    ball_rads = [ball['radius'] for ball in ball_args]
+    largest_rad = max(ball_rads)
+
+    # Predict horizontal scale
+    if args['count_frames']:
+        horizontal_vel = (args['resolution'][0] - 2 * largest_rad) * args['fps'] / args['duration']
+        for ball in ball_args:
+            ball['hor_vel'] = horizontal_vel
+    # Predicting horizontal scale in bounces is much harder. Find the time from starting height to the flattest possible
+    # ball.
+    else:
+        min_time = np.Inf
+        for ball in ball_args:
+            fall_time = ((ball['starting_height'] - ball['radius']) * 2 / args['acceleration']) ** (1/2)
+
+            if ball['deformation'] == 0:
+                if min_time > fall_time * args['duration'] * 2:
+                    min_time = fall_time * args['duration'] * 2
+                    print(min_time)
+                continue
+
+            impact_vel = fall_time * args['acceleration']
+            deformation_acceleration = (impact_vel ** 2) / (2 * (ball['radius'] - 1))
+            deformation_acceleration = deformation_acceleration / ball['deformation']
+            deform_time = impact_vel / deformation_acceleration
+
+            if min_time > (fall_time + deform_time) * args['duration'] * 2:
+                min_time = (fall_time + deform_time) * args['duration'] * 2
+                print(min_time)
+
+        horizontal_vel = (args['resolution'][0] - 2 * largest_rad) / min_time
+        for ball in ball_args:
+            ball['hor_vel'] = horizontal_vel
+
+    # Initialize balls, manager, and screenwriter
     balls = []
     for ball_arg in ball_args:
         balls.append(Ball(ball_arg))
 
     manager = BallManager(args['acceleration'], args['duration'], args['count_frames'], args['fps'], balls)
     screenwriter = ScreenWriter(args['resolution'], args['fps'])
+
 
     # Testing sims
     finished = False
@@ -258,7 +294,7 @@ def parse_args(args):
     parser.add_argument('--count_frames', dest='count_frames', action='store_true',
                         help='Whether to determine video length by number of frames. If not, determined by number of '
                              'bounces.')
-    parser.add_argument('--duration', dest='duration', type=int, default=3,
+    parser.add_argument('--duration', dest='duration', type=int, default=5,
                         help='If --count_frames, number of frames, else number of bounces.')
     parser.add_argument('--acceleration', dest='acceleration', type=float, default=9.81,
                         help='Acceleration due to gravity in pixels/seconds^2. Must be positive (above 0).')
