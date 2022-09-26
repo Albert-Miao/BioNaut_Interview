@@ -89,6 +89,7 @@ class TestScreenWriterMethods(unittest.TestCase):
         self.assertTrue(screenwriter.fps == 60)
         test_display = np.zeros((1280, 720, 3))
         self.assertTrue(np.all(screenwriter.curr_display == test_display))
+        self.assertTrue(len(screenwriter.imgs) == 0)
 
 
 class TestHelperMethods(unittest.TestCase):

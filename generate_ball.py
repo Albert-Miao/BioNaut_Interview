@@ -57,7 +57,7 @@ class Ball:
             if self.y + y_delta <= self.radius:
 
                 # Determine impact speed
-                impact_vel = (self.ver_vel ** 2 + 2 * acceleration * (self.y - self.radius)) ** (1 / 2)
+                impact_vel = -((self.ver_vel ** 2 + 2 * acceleration * (self.y - self.radius)) ** (1 / 2))
 
                 # Determine length of time til impact and set x and y accordingly.
                 curr_step = (impact_vel - self.ver_vel) / acceleration
@@ -107,7 +107,8 @@ class Ball:
             'x': self.x,
             'y': self.y,
             'major': self.radius,
-            'minor': self.radius
+            'minor': self.radius,
+            'color': self.color
         }
 
         return ball_info, False
@@ -165,10 +166,10 @@ class BallManager:
             # max bounces reaches its peak.
             if not self.count_frames and bounced:
                 self.curr_bounces[i] += 1
-                if self.curr_bounces[i] >= self.max_bounces and self.balls[i].ver_vel < 0:
-                    finished = True
+            if self.curr_bounces[i] >= self.max_bounces and self.balls[i].ver_vel < 0:
+                finished = True
 
-        return [], finished
+        return balls_info, finished
 
 
 class ScreenWriter:
@@ -184,10 +185,20 @@ class ScreenWriter:
         self.resolution = resolution
         self.curr_display = np.zeros((resolution[0], resolution[1], 3))
         self.fps = fps
+        self.imgs = []
         return
 
-    def generate_image(self):
-        return 0
+    def generate_image(self, balls_info):
+        self.curr_display = np.zeros((self.resolution[1], self.resolution[0], 3))
+        for ball in balls_info:
+            self.curr_display = cv2.ellipse(self.curr_display,
+                                            np.round((ball['x'], self.resolution[1] - ball['y'])).astype('uint32'),
+                                            np.round((ball['major'], ball['minor'])).astype('uint32'),
+                                            0, 0, 360, ball['color'], thickness=-1)
+
+        # Memory error, going to need to presave imgs.
+        # self.imgs.append(self.curr_display)
+        return self.curr_display
 
 
 # DONE: creates argparse object and passes to parse_args function
@@ -214,6 +225,16 @@ def main():
     manager = BallManager(args['acceleration'], args['duration'], args['count_frames'], args['fps'], balls)
     screenwriter = ScreenWriter(args['resolution'], args['fps'])
 
+    # Testing sims
+    finished = False
+    while not finished:
+        test, finished = manager.nextFrame()
+        img = screenwriter.generate_image(test)
+
+        cv2.imshow('test', img)
+        cv2.waitKey(1)
+
+
     return
 
 
@@ -238,7 +259,7 @@ def parse_args(args):
                         help='Acceleration due to gravity in pixels/seconds^2. Must be positive (above 0).')
     parser.add_argument('--resolution', dest='resolution', nargs="+", type=int, default=[640, 480],
                         help='Resolution of video. Must be 2-dim tuple of positive integers.')
-    parser.add_argument('--fps', dest='fps', type=float, default=30.,
+    parser.add_argument('--fps', dest='fps', type=int, default=30,
                         help='Frames per second.')
     parser.add_argument('--additional_ball', dest='additional_ball', action='store_true',
                         help='Input values for another ball after this one.')
