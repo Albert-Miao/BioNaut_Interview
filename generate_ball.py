@@ -28,7 +28,7 @@ class Ball:
                0 <= ball_attr['color'][2] <= 255
 
         assert type(ball_attr['radius'] is float or type(ball_attr['radius'] is int))
-        assert ball_attr['radius'] > 0.5
+        assert ball_attr['radius'] >= 1
 
         assert type(ball_attr['starting_height']) is float or type(ball_attr['starting_height']) is int
         assert ball_attr['starting_height'] > 0
@@ -46,8 +46,13 @@ class Ball:
         self.x = 0
         self.y = ball_attr['starting_height']
 
-    def nextFrame(self, step):
-        return tuple()
+    def nextFrame(self, acceleration, step):
+        self.x += self.hor_vel * step
+
+        # y_delta = self.ver_vel * step + (1/2) * -acceleration * (step ** 2)
+        #
+        # # Impact occurs when the expected y is below the ground:
+        # if self.y + y_delta < self.radius:
 
 
 # Create a separate BallManager class because there are many attributes that are shared between balls, thus making it
@@ -86,13 +91,19 @@ class BallManager:
     def nextFrame(self):
         ball_info = []
         finished = False
+
+        # If counting frames, return finished if max_frames is surpassed.
         if self.count_frames:
             self.curr_frames += 1
             if self.curr_frames >= self.max_frames:
                 finished = True
 
+        # Iterate though each ball and store info.
         for i, ball in enumerate(self.balls):
-            ball_info.append(ball.nextFrame(1/self.fps))
+            ball_info.append(ball.nextFrame(self.acceleration, 1/self.fps))
+
+            # If the ball bounced in the last frame, record it, and then return finished when a ball that has reached
+            # max bounces reaches its peak.
             if not self.count_frames and ball['bounced']:
                 self.curr_bounces[i] += 1
                 if self.curr_bounces[i] >= self.max_bounces and self.balls[i].ver_vel < 0:
@@ -179,7 +190,7 @@ def parse_args(args):
 
     assert len(args.color) == 3
     assert 0 <= args.color[0] <= 255 and 0 <= args.color[1] <= 255 and 0 <= args.color[2] <= 255
-    assert args.radius > 0.5
+    assert args.radius >= 1
     assert args.starting_height > 0
     assert 0 <= args.deformation <= 1
 
