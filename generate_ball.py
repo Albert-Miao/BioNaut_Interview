@@ -267,8 +267,9 @@ def parse_args(args):
                         help='Color of the ball in RGB. Separate values by spaces (--color 255 255 255)')
     parser.add_argument('--starting_height', dest='starting_height', type=float, default=600.,
                         help='Starting height of the ball in pixels.')
-    parser.add_argument('--radius', dest='radius', type=float, default=20.,
-                        help='Radius of the ball in pixels. Ball must be able to fit within given window.')
+    parser.add_argument('--radius', dest='radius', type=float, default=2.,
+                        help='Radius of the ball in pixels. Ball must be able to fit within given window and larger '
+                             'than 1.')
     parser.add_argument('--deformation', dest='deformation', type=float, default=0.8,
                         help='Deformation of the ball, between 0 and 1. 0 is no deformation, 1 is the most.')
 
@@ -294,7 +295,7 @@ def parse_args(args):
 
     assert len(args.color) == 3
     assert 0 <= args.color[0] <= 255 and 0 <= args.color[1] <= 255 and 0 <= args.color[2] <= 255
-    assert args.radius >= 1
+    assert args.radius > 1
     assert args.starting_height > 0
     assert 0 <= args.deformation <= 1
 

@@ -6,10 +6,11 @@ import os
 import argparse
 import sys
 
+BG_SHADE = 50
 
 def main():
     args = parse_args(sys.argv[1:])
-    capture = cv2.VideoCapture(args.path)
+    capture = cv2.VideoCapture(args['path'])
 
     assert capture.isOpened() and "Error opening video. Could be a multitude of problems, but likely corruption."
 
@@ -19,18 +20,22 @@ def main():
         if not ret:
             break
 
-
+        masks = distinct_color_masks(frame)
 
         cv2.imshow('Frame', frame)
         cv2.waitKey(int(1000/fps))
 
 
+def distinct_color_masks(img):
+    test = np.all(img != BG_SHADE, axis=2) * 255
+
+    return test
 
 
 def parse_args(args):
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--path', dest='path', type=str, default='sample_videos/1.avi',
+    parser.add_argument('--path', dest='path', type=str, default='sample_videos/test.avi',
                         help='Path to video to load.')
     args = parser.parse_args(args)
     assert os.path.exists(args.path)
