@@ -227,6 +227,7 @@ def main():
     print('Number of balls: ' + str(len(ball_args)))
 
     ball_args = get_horizontal_scale(ball_args, args)
+    print(ball_args)
 
     # Initialize balls, manager, and screenwriter
     balls = []
@@ -237,7 +238,10 @@ def main():
     screenwriter = ScreenWriter(args['resolution'], args['fps'], args['title'])
 
     finished = False
+    count = 0
     while not finished:
+        count += 1
+        print(count)
         test, finished = manager.nextFrame()
         img = screenwriter.generate_image(test)
 
@@ -411,7 +415,6 @@ def get_horizontal_scale(ball_args, args):
             if ball['deformation'] == 0:
                 if min_time > fall_time * args['duration'] * 2:
                     min_time = fall_time * args['duration'] * 2
-                    print(min_time)
                 continue
 
             impact_vel = fall_time * args['acceleration']
@@ -421,7 +424,6 @@ def get_horizontal_scale(ball_args, args):
 
             if min_time > (fall_time + deform_time) * args['duration'] * 2:
                 min_time = (fall_time + deform_time) * args['duration'] * 2
-                print(min_time)
 
         horizontal_vel = (args['resolution'][0] - 2 * largest_rad) / min_time
         for ball in ball_args:

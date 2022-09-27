@@ -118,6 +118,7 @@ class TestHelperMethods(unittest.TestCase):
 
         self.assertTrue(args['count_frames'])
         self.assertTrue(args['duration'] == 600)
+        self.assertTrue(args['acceleration'] == 12)
         self.assertTrue(args['resolution'][0] == 1920 and args['resolution'][1] == 1080)
         self.assertTrue(args['fps'] == 60)
         self.assertTrue(args['title'] == 'bounce.avi')
@@ -173,6 +174,7 @@ class TestHelperMethods(unittest.TestCase):
 
         self.assertTrue(args['count_frames'])
         self.assertTrue(args['duration'] == 600)
+        self.assertTrue(args['acceleration'] == 12)
         self.assertTrue(args['resolution'][0] == 1920 and args['resolution'][1] == 1080)
         self.assertTrue(args['fps'] == 60)
 
@@ -203,8 +205,63 @@ class TestHelperMethods(unittest.TestCase):
 
         self.assertTrue(args['count_frames'])
         self.assertTrue(args['duration'] == 600)
+        self.assertTrue(args['acceleration'] == 12)
         self.assertTrue(args['resolution'][0] == 1920 and args['resolution'][1] == 1080)
         self.assertTrue(args['fps'] == 60)
+
+    def test_get_horizontal_scale1(self):
+        ball_args = [
+            {
+                'color': [127, 100, 156],
+                'radius': 10,
+                'starting_height': 300,
+                'deformation': 0,
+            }, {
+                'color': [1, 2, 3],
+                'radius': 5,
+                'starting_height': 100,
+                'deformation': 0.4,
+            }
+        ]
+
+        args = {
+            'count_frames': False,
+            'duration': 5,
+            'acceleration': 9.81,
+            'resolution': [1920, 1080],
+            'fps': 60
+        }
+
+        ball_args = get_horizontal_scale(ball_args, args)
+        self.assertTrue(42 < ball_args[0]['hor_vel'] < 43)
+
+    def test_get_horizontal_scale2(self):
+        ball_args = [
+            {
+                'color': [127, 100, 156],
+                'radius': 10,
+                'starting_height': 300,
+                'deformation': 0,
+            }, {
+                'color': [1, 2, 3],
+                'radius': 5,
+                'starting_height': 100,
+                'deformation': 0.4,
+            }
+        ]
+
+        args = {
+            'count_frames': True,
+            'duration': 600,
+            'acceleration': 9.81,
+            'resolution': [1920, 1080],
+            'fps': 60
+        }
+
+        ball_args = get_horizontal_scale(ball_args, args)
+        self.assertTrue(189 < ball_args[0]['hor_vel'] < 191)
+
+
 
 
 if __name__ == '__main__':
