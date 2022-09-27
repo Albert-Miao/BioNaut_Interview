@@ -108,7 +108,8 @@ class TestHelperMethods(unittest.TestCase):
                            '--resolution', '1920', '1080',
                            '--starting_height', '800',
                            '--radius', '200',
-                           '--fps', '60'])
+                           '--fps', '60',
+                           '--title', 'bounce.avi'])
         balls = args['balls']
         self.assertTrue(balls[0]['color'][0] == 128 and balls[0]['color'][1] == 0 and balls[0]['color'][2] == 64)
         self.assertTrue(balls[0]['starting_height'] == 800)
@@ -119,6 +120,7 @@ class TestHelperMethods(unittest.TestCase):
         self.assertTrue(args['duration'] == 600)
         self.assertTrue(args['resolution'][0] == 1920 and args['resolution'][1] == 1080)
         self.assertTrue(args['fps'] == 60)
+        self.assertTrue(args['title'] == 'bounce.avi')
 
     def test_parse_args2(self):
         self.assertRaises(AssertionError,

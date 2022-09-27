@@ -226,39 +226,7 @@ def main():
     ball_args = args['balls']
     print('Number of balls: ' + str(len(ball_args)))
 
-    ball_rads = [ball['radius'] for ball in ball_args]
-    largest_rad = max(ball_rads)
-
-    # Predict horizontal scale
-    if args['count_frames']:
-        horizontal_vel = (args['resolution'][0] - 2 * largest_rad) * args['fps'] / args['duration']
-        for ball in ball_args:
-            ball['hor_vel'] = horizontal_vel
-    # Predicting horizontal scale in bounces is much harder. Find the time from starting height to the flattest possible
-    # ball.
-    else:
-        min_time = np.Inf
-        for ball in ball_args:
-            fall_time = ((ball['starting_height'] - ball['radius']) * 2 / args['acceleration']) ** (1/2)
-
-            if ball['deformation'] == 0:
-                if min_time > fall_time * args['duration'] * 2:
-                    min_time = fall_time * args['duration'] * 2
-                    print(min_time)
-                continue
-
-            impact_vel = fall_time * args['acceleration']
-            deformation_acceleration = (impact_vel ** 2) / (2 * (ball['radius'] - 1))
-            deformation_acceleration = deformation_acceleration / ball['deformation']
-            deform_time = impact_vel / deformation_acceleration
-
-            if min_time > (fall_time + deform_time) * args['duration'] * 2:
-                min_time = (fall_time + deform_time) * args['duration'] * 2
-                print(min_time)
-
-        horizontal_vel = (args['resolution'][0] - 2 * largest_rad) / min_time
-        for ball in ball_args:
-            ball['hor_vel'] = horizontal_vel
+    ball_args = get_horizontal_scale(ball_args, args)
 
     # Initialize balls, manager, and screenwriter
     balls = []
@@ -266,15 +234,12 @@ def main():
         balls.append(Ball(ball_arg))
 
     manager = BallManager(args['acceleration'], args['duration'], args['count_frames'], args['fps'], balls)
-    screenwriter = ScreenWriter(args['resolution'], args['fps'])
+    screenwriter = ScreenWriter(args['resolution'], args['fps'], args['title'])
 
     finished = False
     while not finished:
         test, finished = manager.nextFrame()
         img = screenwriter.generate_image(test)
-
-
-    return
 
 
 def parse_args(args):
@@ -300,6 +265,8 @@ def parse_args(args):
                         help='Resolution of video. Must be 2-dim tuple of positive integers.')
     parser.add_argument('--fps', dest='fps', type=int, default=30,
                         help='Frames per second.')
+    parser.add_argument('--title', dest='title', type=str, default='test.avi',
+                        help='Title of the video. Make ending ".avi".')
     parser.add_argument('--additional_ball', dest='additional_ball', action='store_true',
                         help='Input values for another ball after this one.')
 
@@ -315,6 +282,7 @@ def parse_args(args):
     assert args.acceleration > 0
     assert len(args.resolution) == 2
     assert args.resolution[0] > 0 and args.resolution[1] > 0
+    assert args.title[-4:] == '.avi' and "Ending is not '.avi'"
     assert args.fps > 0
 
     acceleration = args.acceleration
@@ -322,6 +290,7 @@ def parse_args(args):
     count_frames = args.count_frames
     duration = args.duration
     fps = args.fps
+    title = args.title
 
     assert args.radius * 2 <= resolution[0] and \
            args.radius * 2 <= resolution[1] and \
@@ -355,7 +324,8 @@ def parse_args(args):
         'resolution': resolution,
         'count_frames': count_frames,
         'duration': duration,
-        'fps': fps
+        'fps': fps,
+        'title': title,
     }
 
     return output_args
@@ -411,6 +381,53 @@ def parse_ball_args(args, resolution):
     balls.insert(0, ball)
 
     return balls
+
+
+# Function to determine the best horizontal velocity of balls. Aims to make sure the ball travels the entirety of the
+# screen. Does so by predicting the amount of time for the video to complete. Easy when counting frames, hard when
+# counting bounces due to the impact acceleration detection.
+#
+# ball_args: list of arguments dictionaries for each ball, as formatted in parse_args.
+# args: argument dictionaries for totality of video, as formatted in parse_args.
+def get_horizontal_scale(ball_args, args):
+
+    # Since every ball has the same horizontal velocity, the ball with the largest radius will travel the least
+    # since we're trying to make the ball go from edge to edge of the screen.
+    ball_rads = [ball['radius'] for ball in ball_args]
+    largest_rad = max(ball_rads)
+
+    # Predict horizontal scale of frames by determining distance traveled per second (fps / duration)
+    if args['count_frames']:
+        horizontal_vel = (args['resolution'][0] - 2 * largest_rad) * args['fps'] / args['duration']
+        for ball in ball_args:
+            ball['hor_vel'] = horizontal_vel
+    # Predicting horizontal scale in bounces is much harder. Find the time from starting height to the flattest possible
+    # ball. The quickest time will bounce the most, so calculate time assuming that ball.
+    else:
+        min_time = np.Inf
+        for ball in ball_args:
+            fall_time = ((ball['starting_height'] - ball['radius']) * 2 / args['acceleration']) ** (1/2)
+
+            if ball['deformation'] == 0:
+                if min_time > fall_time * args['duration'] * 2:
+                    min_time = fall_time * args['duration'] * 2
+                    print(min_time)
+                continue
+
+            impact_vel = fall_time * args['acceleration']
+            deformation_acceleration = (impact_vel ** 2) / (2 * (ball['radius'] - 1))
+            deformation_acceleration = deformation_acceleration / ball['deformation']
+            deform_time = impact_vel / deformation_acceleration
+
+            if min_time > (fall_time + deform_time) * args['duration'] * 2:
+                min_time = (fall_time + deform_time) * args['duration'] * 2
+                print(min_time)
+
+        horizontal_vel = (args['resolution'][0] - 2 * largest_rad) / min_time
+        for ball in ball_args:
+            ball['hor_vel'] = horizontal_vel
+
+    return ball_args
 
 
 if __name__ == "__main__":
