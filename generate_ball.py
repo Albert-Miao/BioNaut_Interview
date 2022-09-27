@@ -211,8 +211,8 @@ class ScreenWriter:
 # DONE: creates Ball object to be run, initialized with core args
 # DONE: creates BallManager object with all relevant balls.
 # DONE: creates ScreenWriter object, initialized with core args
-# NEED: Predict horizontal scale
-# NEED: For however long the video lasts, grab the next frame from Ball with something like nextFrame().
+# DONE: Predict horizontal scale
+# DONE: For however long the video lasts, grab the next frame from Ball with something like nextFrame().
 #       Probably returns info of position, color, major and minor axis.
 # NEED: Store the relevant info of Ball at each frame until end.
 # NEED: Pass relevant info to ScreenWriter and append result to images list
