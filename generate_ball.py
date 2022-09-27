@@ -181,7 +181,7 @@ class BallManager:
 class ScreenWriter:
     # Initializes ScreenWriter. Only takes in resolution, a 2-dim tuple of positive integers, and fps, a positive
     # integer.
-    def __init__(self, resolution, fps):
+    def __init__(self, resolution, fps, title='test.avi'):
         assert (type(resolution) is list or type(resolution) is tuple) and len(resolution) == 2
         assert type(resolution[0]) is int and type(resolution[1]) is int
         assert resolution[0] > 0 and resolution[1] > 0
@@ -192,6 +192,8 @@ class ScreenWriter:
         self.curr_display = np.zeros((resolution[0], resolution[1], 3))
         self.fps = fps
         self.imgs = []
+
+        self.writer = cv2.VideoWriter(title, cv2.VideoWriter_fourcc(*'DIVX'), fps, resolution)
         return
 
     def generate_image(self, balls_info):
@@ -266,15 +268,11 @@ def main():
     manager = BallManager(args['acceleration'], args['duration'], args['count_frames'], args['fps'], balls)
     screenwriter = ScreenWriter(args['resolution'], args['fps'])
 
-
-    # Testing sims
     finished = False
     while not finished:
         test, finished = manager.nextFrame()
         img = screenwriter.generate_image(test)
 
-        cv2.imshow('test', img)
-        cv2.waitKey(1)
 
     return
 
