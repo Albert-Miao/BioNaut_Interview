@@ -7,7 +7,7 @@ import os
 
 import argparse
 
-PRE_SCALED_HOR_VEL = 1
+BG_SHADE = 50
 
 
 class Ball:
@@ -197,7 +197,7 @@ class ScreenWriter:
         return
 
     def generate_image(self, balls_info):
-        self.curr_display = np.ones((self.resolution[1], self.resolution[0], 3), dtype='uint8') * 50
+        self.curr_display = np.ones((self.resolution[1], self.resolution[0], 3), dtype='uint8') * BG_SHADE
         for ball in balls_info:
             self.curr_display = cv2.ellipse(self.curr_display,
                                             np.round((ball['x'], self.resolution[1] - ball['y'])).astype('uint32'),
@@ -225,6 +225,10 @@ class ScreenWriter:
 
 def main():
     args = parse_args(sys.argv[1:])
+
+    if not os.path.exists(args['output_dir']):
+        os.mkdir(args['output_dir'])
+
     ball_args = args['balls']
     print('Number of balls: ' + str(len(ball_args)))
 
@@ -237,7 +241,7 @@ def main():
         balls.append(Ball(ball_arg))
 
     manager = BallManager(args['acceleration'], args['duration'], args['count_frames'], args['fps'], balls)
-    screenwriter = ScreenWriter(args['resolution'], args['fps'], args['title'])
+    screenwriter = ScreenWriter(args['resolution'], args['fps'], os.path.join(args['output_dir'], args['title']))
 
     finished = False
     frame_num = 0
@@ -251,7 +255,7 @@ def main():
         img = screenwriter.generate_image(test)
 
         # cv2.imshow('test', img)
-        # cv2.waitKey(1)
+        # cv2.waitKey(int(1000/args['fps']))
 
     screenwriter.release()
 
@@ -279,6 +283,8 @@ def parse_args(args):
                         help='Resolution of video. Must be 2-dim tuple of positive integers.')
     parser.add_argument('--fps', dest='fps', type=float, default=120.,
                         help='Frames per second.')
+    parser.add_argument('--output_dir', dest='output_dir', type=str, default='sample_videos',
+                        help='Output directory.')
     parser.add_argument('--title', dest='title', type=str, default='test.avi',
                         help='Title of the video. Make ending ".avi".')
     parser.add_argument('--additional_ball', dest='additional_ball', action='store_true',
@@ -305,6 +311,7 @@ def parse_args(args):
     duration = args.duration
     fps = args.fps
     title = args.title
+    output_dir = args.output_dir
 
     assert args.radius * 2 <= resolution[0] and \
            args.radius * 2 <= resolution[1] and \
@@ -340,6 +347,7 @@ def parse_args(args):
         'duration': duration,
         'fps': fps,
         'title': title,
+        'output_dir': output_dir
     }
 
     return output_args
