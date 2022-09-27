@@ -86,12 +86,12 @@ class TestBallManagerMethods(unittest.TestCase):
 
 class TestScreenWriterMethods(unittest.TestCase):
     def test_init(self):
-        screenwriter = ScreenWriter((1280, 720), 60)
+        screenwriter = ScreenWriter((1280, 720), 60.)
 
         self.assertTrue(screenwriter.resolution[0] == 1280 and screenwriter.resolution[1] == 720)
         self.assertTrue(screenwriter.fps == 60)
 
-        test_display = np.zeros((1280, 720, 3))
+        test_display = np.zeros((720, 1280, 3))
         self.assertTrue(np.all(screenwriter.curr_display == test_display))
 
         self.assertTrue(len(screenwriter.imgs) == 0)

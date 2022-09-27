@@ -186,27 +186,29 @@ class ScreenWriter:
         assert type(resolution[0]) is int and type(resolution[1]) is int
         assert resolution[0] > 0 and resolution[1] > 0
 
-        assert type(fps) is int and fps > 0
+        assert type(fps) is float and fps > 0
 
         self.resolution = resolution
-        self.curr_display = np.zeros((resolution[0], resolution[1], 3))
+        self.curr_display = np.zeros((resolution[1], resolution[0], 3), dtype='uint8')
         self.fps = fps
         self.imgs = []
 
-        self.writer = cv2.VideoWriter(title, cv2.VideoWriter_fourcc(*'DIVX'), fps, resolution)
+        self.writer = cv2.VideoWriter(title, cv2.VideoWriter_fourcc(*'mjpg'), fps, resolution)
         return
 
     def generate_image(self, balls_info):
-        self.curr_display = np.zeros((self.resolution[1], self.resolution[0], 3))
+        self.curr_display = np.zeros((self.resolution[1], self.resolution[0], 3), dtype='uint8')
         for ball in balls_info:
             self.curr_display = cv2.ellipse(self.curr_display,
                                             np.round((ball['x'], self.resolution[1] - ball['y'])).astype('uint32'),
                                             np.round((ball['major'], ball['minor'])).astype('uint32'),
                                             0, 0, 360, ball['color'], thickness=-1)
 
-        # Memory error, going to need to presave imgs.
-        # self.imgs.append(self.curr_display)
+        self.writer.write(self.curr_display)
         return self.curr_display
+
+    def release(self):
+        self.writer.release()
 
 
 # DONE: creates argparse object and passes to parse_args function
@@ -238,12 +240,18 @@ def main():
     screenwriter = ScreenWriter(args['resolution'], args['fps'], args['title'])
 
     finished = False
-    count = 0
+    frame_num = 0
+
     while not finished:
-        count += 1
-        print(count)
+        frame_num += 1
+        print(frame_num)
         test, finished = manager.nextFrame()
         img = screenwriter.generate_image(test)
+
+        cv2.imshow('test', img)
+        cv2.waitKey(1)
+
+    screenwriter.release()
 
 
 def parse_args(args):
@@ -263,11 +271,11 @@ def parse_args(args):
                              'bounces.')
     parser.add_argument('--duration', dest='duration', type=int, default=5,
                         help='If --count_frames, number of frames, else number of bounces.')
-    parser.add_argument('--acceleration', dest='acceleration', type=float, default=9.81,
+    parser.add_argument('--acceleration', dest='acceleration', type=float, default=1000,
                         help='Acceleration due to gravity in pixels/seconds^2. Must be positive (above 0).')
     parser.add_argument('--resolution', dest='resolution', nargs="+", type=int, default=[640, 480],
                         help='Resolution of video. Must be 2-dim tuple of positive integers.')
-    parser.add_argument('--fps', dest='fps', type=int, default=30,
+    parser.add_argument('--fps', dest='fps', type=float, default=120.,
                         help='Frames per second.')
     parser.add_argument('--title', dest='title', type=str, default='test.avi',
                         help='Title of the video. Make ending ".avi".')
@@ -339,6 +347,8 @@ def get_input(text):
     return input(text)
 
 
+# Recursive function called by parse_args to add additional balls without requiring multiple calls of acceleration, fps,
+# resolution and count_frames arguments.
 def parse_ball_args(args, resolution):
     parser = argparse.ArgumentParser()
 
