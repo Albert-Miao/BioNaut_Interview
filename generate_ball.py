@@ -197,7 +197,7 @@ class ScreenWriter:
         return
 
     def generate_image(self, balls_info):
-        self.curr_display = np.zeros((self.resolution[1], self.resolution[0], 3), dtype='uint8')
+        self.curr_display = np.ones((self.resolution[1], self.resolution[0], 3), dtype='uint8') * 50
         for ball in balls_info:
             self.curr_display = cv2.ellipse(self.curr_display,
                                             np.round((ball['x'], self.resolution[1] - ball['y'])).astype('uint32'),
@@ -242,14 +242,16 @@ def main():
     finished = False
     frame_num = 0
 
+    # Iterate through each timestep until the BallManager reports done. Save the images as a video.
     while not finished:
         frame_num += 1
         print(frame_num)
+
         test, finished = manager.nextFrame()
         img = screenwriter.generate_image(test)
 
-        cv2.imshow('test', img)
-        cv2.waitKey(1)
+        # cv2.imshow('test', img)
+        # cv2.waitKey(1)
 
     screenwriter.release()
 
@@ -259,11 +261,11 @@ def parse_args(args):
 
     parser.add_argument('--color', dest='color', nargs="+", type=int, default=[255, 255, 255],
                         help='Color of the ball in RGB. Separate values by spaces (--color 255 255 255)')
-    parser.add_argument('--starting_height', dest='starting_height', type=float, default=400.,
+    parser.add_argument('--starting_height', dest='starting_height', type=float, default=600.,
                         help='Starting height of the ball in pixels.')
     parser.add_argument('--radius', dest='radius', type=float, default=20.,
                         help='Radius of the ball in pixels. Ball must be able to fit within given window.')
-    parser.add_argument('--deformation', dest='deformation', type=float, default=0.3,
+    parser.add_argument('--deformation', dest='deformation', type=float, default=0.8,
                         help='Deformation of the ball, between 0 and 1. 0 is no deformation, 1 is the most.')
 
     parser.add_argument('--count_frames', dest='count_frames', action='store_true',
@@ -271,9 +273,9 @@ def parse_args(args):
                              'bounces.')
     parser.add_argument('--duration', dest='duration', type=int, default=5,
                         help='If --count_frames, number of frames, else number of bounces.')
-    parser.add_argument('--acceleration', dest='acceleration', type=float, default=1000,
+    parser.add_argument('--acceleration', dest='acceleration', type=float, default=5000,
                         help='Acceleration due to gravity in pixels/seconds^2. Must be positive (above 0).')
-    parser.add_argument('--resolution', dest='resolution', nargs="+", type=int, default=[640, 480],
+    parser.add_argument('--resolution', dest='resolution', nargs="+", type=int, default=[1280, 720],
                         help='Resolution of video. Must be 2-dim tuple of positive integers.')
     parser.add_argument('--fps', dest='fps', type=float, default=120.,
                         help='Frames per second.')
