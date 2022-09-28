@@ -86,12 +86,16 @@ class TestBallManagerMethods(unittest.TestCase):
 
 class TestScreenWriterMethods(unittest.TestCase):
     def test_init(self):
-        screenwriter = ScreenWriter((1280, 720), 60.)
+        screenwriter = ScreenWriter((100, 100, 100), (1280, 720), 60.)
 
+        self.assertTrue(screenwriter.bg_color[0] == 100 and
+                        screenwriter.bg_color[1] == 100 and
+                        screenwriter.bg_color[2] == 100)
         self.assertTrue(screenwriter.resolution[0] == 1280 and screenwriter.resolution[1] == 720)
         self.assertTrue(screenwriter.fps == 60)
 
         test_display = np.zeros((720, 1280, 3))
+        test_display[:] = (100, 100, 100)
         self.assertTrue(np.all(screenwriter.curr_display == test_display))
 
         self.assertTrue(len(screenwriter.imgs) == 0)
@@ -260,8 +264,6 @@ class TestHelperMethods(unittest.TestCase):
 
         ball_args = get_horizontal_scale(ball_args, args)
         self.assertTrue(189 < ball_args[0]['hor_vel'] < 191)
-
-
 
 
 if __name__ == '__main__':

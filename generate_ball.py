@@ -7,8 +7,6 @@ import os
 
 import argparse
 
-BG_SHADE = 50
-
 
 class Ball:
     # Initializes Ball with color as an RGB tuple, ball radius, & starting height in px, all in a dictionary.
@@ -181,23 +179,31 @@ class BallManager:
 class ScreenWriter:
     # Initializes ScreenWriter. Only takes in resolution, a 2-dim tuple of positive integers, and fps, a positive
     # integer.
-    def __init__(self, resolution, fps, title='test.avi'):
+    def __init__(self, bg_color, resolution, fps, title='test.avi'):
+        assert (type(bg_color) is list or type(bg_color) is tuple) and len(bg_color) == 3
+        assert 0 <= bg_color[0] <= 255 and \
+               0 <= bg_color[1] <= 255 and \
+               0 <= bg_color[2] <= 255
+
         assert (type(resolution) is list or type(resolution) is tuple) and len(resolution) == 2
         assert type(resolution[0]) is int and type(resolution[1]) is int
         assert resolution[0] > 0 and resolution[1] > 0
 
         assert type(fps) is float and fps > 0
 
+        self.bg_color = bg_color
         self.resolution = resolution
         self.curr_display = np.zeros((resolution[1], resolution[0], 3), dtype='uint8')
+        self.curr_display[:] = bg_color
         self.fps = fps
         self.imgs = []
 
-        self.writer = cv2.VideoWriter(title, cv2.VideoWriter_fourcc(*'mjpg'), fps, resolution)
+        self.writer = cv2.VideoWriter(title, cv2.VideoWriter_fourcc(*'MJPG'), fps, resolution)
         return
 
     def generate_image(self, balls_info):
-        self.curr_display = np.ones((self.resolution[1], self.resolution[0], 3), dtype='uint8') * BG_SHADE
+        self.curr_display = np.zeros((self.resolution[1], self.resolution[0], 3), dtype='uint8')
+        self.curr_display[:] = self.bg_color
         for ball in balls_info:
             self.curr_display = cv2.ellipse(self.curr_display,
                                             np.round((ball['x'], self.resolution[1] - ball['y'])).astype('uint32'),
@@ -218,9 +224,9 @@ class ScreenWriter:
 # DONE: Predict horizontal scale
 # DONE: For however long the video lasts, grab the next frame from Ball with something like nextFrame().
 #       Probably returns info of position, color, major and minor axis.
-# NEED: Store the relevant info of Ball at each frame until end.
-# NEED: Pass relevant info to ScreenWriter and append result to images list
-# NEED: Save images.
+# DONE: Store the relevant info of Ball at each frame until end.
+# DONE: Pass relevant info to ScreenWriter and append result to images list
+# DONE: Save images.
 
 
 def main():
@@ -241,7 +247,8 @@ def main():
         balls.append(Ball(ball_arg))
 
     manager = BallManager(args['acceleration'], args['duration'], args['count_frames'], args['fps'], balls)
-    screenwriter = ScreenWriter(args['resolution'], args['fps'], os.path.join(args['output_dir'], args['title']))
+    screenwriter = ScreenWriter(args['background_color'], args['resolution'], args['fps'],
+                                os.path.join(args['output_dir'], args['title']))
 
     finished = False
     frame_num = 0
@@ -288,6 +295,9 @@ def parse_args(args):
                         help='Output directory.')
     parser.add_argument('--title', dest='title', type=str, default='test.avi',
                         help='Title of the video. Make ending ".avi".')
+    parser.add_argument('--background_color', dest='background_color', nargs="+", type=int, default=[50, 50, 50],
+                        help='Color of the background. For optimal detection, avoid choosing too similar ball and '
+                             'background colors.')
     parser.add_argument('--additional_ball', dest='additional_ball', action='store_true',
                         help='Input values for another ball after this one.')
 
@@ -304,6 +314,10 @@ def parse_args(args):
     assert len(args.resolution) == 2
     assert args.resolution[0] > 0 and args.resolution[1] > 0
     assert args.title[-4:] == '.avi' and "Ending is not '.avi'"
+    assert len(args.background_color) == 3
+    assert 0 <= args.background_color[0] <= 255 and \
+           0 <= args.background_color[1] <= 255 and \
+           0 <= args.background_color[2] <= 255
     assert args.fps > 0
 
     acceleration = args.acceleration
@@ -313,6 +327,7 @@ def parse_args(args):
     fps = args.fps
     title = args.title
     output_dir = args.output_dir
+    background_color = args.background_color
 
     assert args.radius * 2 <= resolution[0] and \
            args.radius * 2 <= resolution[1] and \
@@ -348,7 +363,8 @@ def parse_args(args):
         'duration': duration,
         'fps': fps,
         'title': title,
-        'output_dir': output_dir
+        'output_dir': output_dir,
+        'background_color': background_color
     }
 
     return output_args
