@@ -110,6 +110,7 @@ class TestHelperMethods(unittest.TestCase):
                            '--acceleration', '12',
                            '--deformation', '0.45',
                            '--resolution', '1920', '1080',
+                           '--background_color', '15', '20', '25',
                            '--starting_height', '800',
                            '--radius', '200',
                            '--fps', '60',
@@ -126,6 +127,9 @@ class TestHelperMethods(unittest.TestCase):
         self.assertTrue(args['resolution'][0] == 1920 and args['resolution'][1] == 1080)
         self.assertTrue(args['fps'] == 60)
         self.assertTrue(args['title'] == 'bounce.avi')
+        self.assertTrue(args['background_color'][0] == 15 and
+                        args['background_color'][1] == 20 and
+                        args['background_color'][2] == 25)
 
     def test_parse_args2(self):
         self.assertRaises(AssertionError,
