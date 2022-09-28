@@ -11,7 +11,8 @@ CONTOUR_THRESHOLD = 2
 THUMBNAIL_FACTOR = 5
 
 BORDER_COLOR = (0, 255, 0)
-THUMBNAIL_COLOR = np.array((0, 0, 255))
+THUMBNAIL_COLOR = (0, 255, 0)
+
 
 def main():
     args = parse_args(sys.argv[1:])
@@ -21,6 +22,7 @@ def main():
 
     fps = capture.get(cv2.CAP_PROP_FPS)
     error_shown = False
+    count = 0
 
     # Iterate through frames of video
     while capture.isOpened():
@@ -29,6 +31,7 @@ def main():
             break
 
         start = time.time()
+        count += 1
 
         # Copy the original image, resized.
         thumbnail = frame[::THUMBNAIL_FACTOR, ::THUMBNAIL_FACTOR].copy()
@@ -38,9 +41,11 @@ def main():
         # Find contours and draw them.
         contours = distinct_contours(frame, args['tolerance'], args['background_color'])
         frame = cv2.drawContours(frame, contours, -1, BORDER_COLOR, 2)
-        print(len(contours))
 
+        # Added thumbnail and frame number to video.
         frame[:thumbnail.shape[0], :thumbnail.shape[1]] = thumbnail
+        frame = cv2.putText(frame, str(count).zfill(5), (0, frame.shape[0] - 5),
+                            cv2.FONT_HERSHEY_SIMPLEX, 1, color=THUMBNAIL_COLOR)
 
         end = time.time()
         time_to_run = end - start
@@ -48,8 +53,8 @@ def main():
         cv2.imshow('Frame', frame)
 
         # Try to show the image in time with the fps. If not able to, show an error.
-        if int(1000)/fps - time_to_run > 0:
-            cv2.waitKey(int(1000/fps))
+        if int(1000) / fps - time_to_run > 0:
+            cv2.waitKey(int(1000 / fps))
         elif not error_shown:
             print("WARNING: Scene too difficult to draw with given fps. Saved video will be in correct speed. Consider "
                   "increasing tolerance.")
@@ -77,7 +82,6 @@ def distinct_contours(img, tolerance, bg_color):
 
     all_contours = []
     while len(unique_colors):
-
         # While there are still possible colors, we take the color with the most pixels and mask it.
         color_ind = np.argmax(unique_counts)
         color = unique_colors[color_ind].astype('int')
@@ -133,7 +137,6 @@ def parse_args(args):
     }
 
     return args
-
 
 
 if __name__ == "__main__":
