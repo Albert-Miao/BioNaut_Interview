@@ -30,6 +30,21 @@ class TestBallMethods(unittest.TestCase):
         self.assertTrue(ball.hor_vel == 20)
         self.assertTrue(ball.ver_vel == 0)
 
+    def test_get_info(self):
+        ball_attr = {
+            'color': [127, 100, 156],
+            'radius': 10,
+            'starting_height': 300,
+            'deformation': 0,
+            'hor_vel': 20
+        }
+
+        info = Ball(ball_attr).get_info()
+        self.assertTrue(info['x'] == 10)
+        self.assertTrue(info['y'] == 300)
+        self.assertTrue(info['major'] == 10 and info['minor'] == 10)
+        self.assertTrue(info['color'][0] == 127 and info['color'][1] == 100 and info['color'][2] == 156)
+
 
 class TestBallManagerMethods(unittest.TestCase):
     def test_init1(self):
@@ -82,6 +97,38 @@ class TestBallManagerMethods(unittest.TestCase):
         self.assertTrue(manager.balls[1].y == 100)
         self.assertTrue(manager.balls[1].deformation == 0.4)
         self.assertTrue(manager.balls[1].deformation_acceleration == -1)
+
+    def test_get_info(self):
+        ball_attr1 = {
+            'color': [127, 100, 156],
+            'radius': 10,
+            'starting_height': 300,
+            'deformation': 0,
+            'hor_vel': 20
+        }
+
+        ball_attr2 = {
+            'color': [1, 2, 3],
+            'radius': 5,
+            'starting_height': 100,
+            'deformation': 0.4,
+            'hor_vel': 10
+        }
+
+        balls = [Ball(ball_attr1), Ball(ball_attr2)]
+
+        manager = BallManager(9.81, 5, False, 60, balls)
+        info = manager.get_info()
+
+        self.assertTrue(info[0]['x'] == 10)
+        self.assertTrue(info[0]['y'] == 300)
+        self.assertTrue(info[0]['major'] == 10 and info[0]['minor'] == 10)
+        self.assertTrue(info[0]['color'][0] == 127 and info[0]['color'][1] == 100 and info[0]['color'][2] == 156)
+
+        self.assertTrue(info[1]['x'] == 5)
+        self.assertTrue(info[1]['y'] == 100)
+        self.assertTrue(info[1]['major'] == 5 and info[1]['minor'] == 5)
+        self.assertTrue(info[1]['color'][0] == 1 and info[1]['color'][1] == 2 and info[1]['color'][2] == 3)
 
 
 class TestScreenWriterMethods(unittest.TestCase):
