@@ -207,9 +207,9 @@ class TestHelperMethods(unittest.TestCase):
         self.assertTrue(balls[0]['deformation'] == 0.45)
 
         self.assertTrue(balls[1]['color'][0] == 255 and balls[1]['color'][1] == 255 and balls[1]['color'][2] == 255)
-        self.assertTrue(balls[1]['starting_height'] == 400)
+        self.assertTrue(balls[1]['starting_height'] == 600)
         self.assertTrue(balls[1]['radius'] == 20)
-        self.assertTrue(balls[1]['deformation'] == 0)
+        self.assertTrue(balls[1]['deformation'] == 0.5)
 
         self.assertTrue(args['count_frames'])
         self.assertTrue(args['duration'] == 600)

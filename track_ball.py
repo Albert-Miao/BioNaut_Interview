@@ -24,7 +24,8 @@ def main():
     height = int(capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
     width = int(capture.get(cv2.CAP_PROP_FRAME_WIDTH))
     num_frames = int(capture.get(cv2.CAP_PROP_FRAME_COUNT))
-    highest_place = int(np.log10(num_frames)) + 1
+
+    highest_frame_place = int(np.log10(num_frames)) + 1
     error_shown = False
     count = 0
 
@@ -45,8 +46,10 @@ def main():
 
         # Copy the original image, resized. Add a border.
         thumbnail = frame[::THUMBNAIL_FACTOR, ::THUMBNAIL_FACTOR].copy()
+        thumbnail[:, :2] = THUMBNAIL_COLOR
         thumbnail[:, -2:] = THUMBNAIL_COLOR
         thumbnail[-2:] = THUMBNAIL_COLOR
+        thumbnail[:2] = THUMBNAIL_COLOR
 
         # Find contours and draw them.
         contours = distinct_contours(frame, args['tolerance'], args['background_color'])
@@ -54,7 +57,7 @@ def main():
 
         # Added thumbnail and frame number to video.
         frame[:thumbnail.shape[0], :thumbnail.shape[1]] = thumbnail
-        frame = cv2.putText(frame, str(count).zfill(highest_place), (0, frame.shape[0] - 5),
+        frame = cv2.putText(frame, str(count).zfill(highest_frame_place), (0, frame.shape[0] - 5),
                             cv2.FONT_HERSHEY_SIMPLEX, 1, color=THUMBNAIL_COLOR)
 
         writer.write(frame)
@@ -71,12 +74,13 @@ def main():
             if not error_shown:
                 print("WARNING: Scene too difficult to draw with given fps. Saved video will be in correct speed. "
                       "Consider increasing tolerance.")
+                error_shown = True
             cv2.waitKey(1)
-            error_shown = True
 
     writer.release()
 
 
+# Goal is to find the contours of all blobs of color present in the frame.
 def distinct_contours(img, tolerance, bg_color):
     assert type(img) is np.ndarray and len(img.shape) == 3 and img.shape[-1] == 3
     assert tolerance >= 0
@@ -84,9 +88,9 @@ def distinct_contours(img, tolerance, bg_color):
 
     bg_color = np.array(bg_color)
 
-    # Filter out background with tolerance. Since the video is saved in a compressed format, there are going to be some
-    # artifacts in the image. We could do a harder gaussian blur to get rid of some of the most extreme cases, but I
-    # believe that might inhibit tracking of the smallest balls.
+    # img = cv2.GaussianBlur(img, (5, 5), 0)
+
+    # Filter out background with tolerance.
     bg_high = np.clip(bg_color.astype('int') + tolerance, 0, 255).astype('uint8')
     bg_low = np.clip(bg_color.astype('int') - tolerance, 0, 255).astype('uint8')
     mask = cv2.bitwise_not(cv2.inRange(img, bg_low, bg_high))
@@ -123,7 +127,7 @@ def parse_args(args):
 
     parser.add_argument('--path', dest='path', type=str, default='sample_videos/test.avi',
                         help='Path to video to load.')
-    parser.add_argument('--tolerance', dest='tolerance', type=int, default=30,
+    parser.add_argument('--tolerance', dest='tolerance', type=int, default=0,
                         help='Tolerance for colors. When detecting balls, colors that fall within the range of another'
                              'will be considered part of the same ball.')
     parser.add_argument('--background_color', dest='background_color', nargs="+", type=int, default=[50, 50, 50],

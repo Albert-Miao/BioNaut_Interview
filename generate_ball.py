@@ -45,6 +45,7 @@ class Ball:
         self.x = self.radius
         self.y = ball_attr['starting_height']
 
+    # Calculate the next frame of the ball given acceleration and step. step must be positive.
     def nextFrame(self, acceleration, step):
 
         # Check to see if ball is not in impact
@@ -104,6 +105,13 @@ class Ball:
             self.y += y_delta
             self.ver_vel += self.deformation_acceleration * step
 
+        ball_info = self.get_info()
+
+        return ball_info, False
+
+    # Return position, deformation, and color of ball.
+    def get_info(self):
+
         minor = min(self.y, self.radius)
         major = (self.radius ** 2) / minor
 
@@ -115,7 +123,7 @@ class Ball:
             'color': self.color
         }
 
-        return ball_info, False
+        return ball_info
 
 
 # Create a separate BallManager class because there are many attributes that are shared between balls, thus making it
@@ -151,6 +159,7 @@ class BallManager:
         self.fps = fps
         self.balls = balls
 
+    # Simulate next frame of balls and return ball info.
     def nextFrame(self):
         balls_info = []
         finished = False
@@ -175,6 +184,14 @@ class BallManager:
 
         return balls_info, finished
 
+    # Return info of all balls in manager.
+    def get_info(self):
+        output = []
+        for ball in self.balls:
+            output.append(ball.get_info())
+
+        return output
+
 
 class ScreenWriter:
     # Initializes ScreenWriter. Only takes in resolution, a 2-dim tuple of positive integers, and fps, a positive
@@ -198,9 +215,10 @@ class ScreenWriter:
         self.fps = fps
         self.imgs = []
 
-        self.writer = cv2.VideoWriter(title, cv2.VideoWriter_fourcc(*'MJPG'), fps, resolution)
+        self.writer = cv2.VideoWriter(title, cv2.VideoWriter_fourcc(*'RGBA'), fps, resolution)
         return
 
+    # Generate the image from info about the balls. Balls_info must be a list formatted as per Ball.get_info
     def generate_image(self, balls_info):
         self.curr_display = np.zeros((self.resolution[1], self.resolution[0], 3), dtype='uint8')
         self.curr_display[:] = self.bg_color
@@ -253,13 +271,16 @@ def main():
     finished = False
     frame_num = 0
 
+    ball_info = manager.get_info()
+    screenwriter.generate_image(ball_info)
+
     # Iterate through each timestep until the BallManager reports done. Save the images as a video.
     while not finished:
         frame_num += 1
         print(frame_num)
 
-        test, finished = manager.nextFrame()
-        img = screenwriter.generate_image(test)
+        ball_info, finished = manager.nextFrame()
+        img = screenwriter.generate_image(ball_info)
 
         # cv2.imshow('test', img)
         # cv2.waitKey(int(1000/args['fps']))
@@ -277,7 +298,7 @@ def parse_args(args):
     parser.add_argument('--radius', dest='radius', type=float, default=20.,
                         help='Radius of the ball in pixels. Ball must be able to fit within given window and larger '
                              'than 1.')
-    parser.add_argument('--deformation', dest='deformation', type=float, default=0.8,
+    parser.add_argument('--deformation', dest='deformation', type=float, default=0.5,
                         help='Deformation of the ball, between 0 and 1. 0 is no deformation, 1 is the most.')
 
     parser.add_argument('--count_frames', dest='count_frames', action='store_true',
@@ -381,11 +402,12 @@ def parse_ball_args(args, resolution):
 
     parser.add_argument('--color', dest='color', nargs="+", type=int, default=[255, 255, 255],
                         help='Color of the ball in RGB. Separate values by spaces (--color 255 255 255)')
-    parser.add_argument('--starting_height', dest='starting_height', type=float, default=400.,
+    parser.add_argument('--starting_height', dest='starting_height', type=float, default=600.,
                         help='Starting height of the ball in pixels.')
     parser.add_argument('--radius', dest='radius', type=float, default=20.,
-                        help='Radius of the ball in pixels. Ball must be able to fit within given window.')
-    parser.add_argument('--deformation', dest='deformation', type=float, default=0.0,
+                        help='Radius of the ball in pixels. Ball must be able to fit within given window and larger '
+                             'than 1.')
+    parser.add_argument('--deformation', dest='deformation', type=float, default=0.5,
                         help='Deformation of the ball, between 0 and 1. 0 is no deformation, 1 is the most.')
     parser.add_argument('--additional_ball', dest='additional_ball', action='store_true',
                         help='Input values for another ball after this one.')
@@ -431,7 +453,6 @@ def parse_ball_args(args, resolution):
 # ball_args: list of arguments dictionaries for each ball, as formatted in parse_args.
 # args: argument dictionaries for totality of video, as formatted in parse_args.
 def get_horizontal_scale(ball_args, args):
-
     # Since every ball has the same horizontal velocity, the ball with the largest radius will travel the least
     # since we're trying to make the ball go from edge to edge of the screen.
     ball_rads = [ball['radius'] for ball in ball_args]
@@ -447,7 +468,7 @@ def get_horizontal_scale(ball_args, args):
     else:
         min_time = np.Inf
         for ball in ball_args:
-            fall_time = ((ball['starting_height'] - ball['radius']) * 2 / args['acceleration']) ** (1/2)
+            fall_time = ((ball['starting_height'] - ball['radius']) * 2 / args['acceleration']) ** (1 / 2)
 
             if ball['deformation'] == 0:
                 if min_time > fall_time * args['duration'] * 2:
