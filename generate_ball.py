@@ -289,7 +289,7 @@ def parse_args(args):
                         help='Acceleration due to gravity in pixels/seconds^2. Must be positive (above 0).')
     parser.add_argument('--resolution', dest='resolution', nargs="+", type=int, default=[1280, 720],
                         help='Resolution of video. Must be 2-dim tuple of positive integers.')
-    parser.add_argument('--fps', dest='fps', type=float, default=120.,
+    parser.add_argument('--fps', dest='fps', type=float, default=60.,
                         help='Frames per second.')
     parser.add_argument('--output_dir', dest='output_dir', type=str, default='sample_videos',
                         help='Output directory.')

@@ -21,8 +21,18 @@ def main():
     assert capture.isOpened() and "Error opening video. Could be a multitude of problems, but likely corruption."
 
     fps = capture.get(cv2.CAP_PROP_FPS)
+    height = int(capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    width = int(capture.get(cv2.CAP_PROP_FRAME_WIDTH))
+    num_frames = int(capture.get(cv2.CAP_PROP_FRAME_COUNT))
+    highest_place = int(np.log10(num_frames)) + 1
     error_shown = False
     count = 0
+
+    if not os.path.exists(args['output_dir']):
+        os.mkdir(args['output_dir'])
+
+    writer = cv2.VideoWriter(os.path.join(args['output_dir'], args['save_name']), cv2.VideoWriter_fourcc(*'MJPG'), fps,
+                             (width, height))
 
     # Iterate through frames of video
     while capture.isOpened():
@@ -33,7 +43,7 @@ def main():
         start = time.time()
         count += 1
 
-        # Copy the original image, resized.
+        # Copy the original image, resized. Add a border.
         thumbnail = frame[::THUMBNAIL_FACTOR, ::THUMBNAIL_FACTOR].copy()
         thumbnail[:, -2:] = THUMBNAIL_COLOR
         thumbnail[-2:] = THUMBNAIL_COLOR
@@ -44,8 +54,10 @@ def main():
 
         # Added thumbnail and frame number to video.
         frame[:thumbnail.shape[0], :thumbnail.shape[1]] = thumbnail
-        frame = cv2.putText(frame, str(count).zfill(5), (0, frame.shape[0] - 5),
+        frame = cv2.putText(frame, str(count).zfill(highest_place), (0, frame.shape[0] - 5),
                             cv2.FONT_HERSHEY_SIMPLEX, 1, color=THUMBNAIL_COLOR)
+
+        writer.write(frame)
 
         end = time.time()
         time_to_run = end - start
@@ -53,13 +65,16 @@ def main():
         cv2.imshow('Frame', frame)
 
         # Try to show the image in time with the fps. If not able to, show an error.
-        if int(1000) / fps - time_to_run > 0:
-            cv2.waitKey(int(1000 / fps))
-        elif not error_shown:
-            print("WARNING: Scene too difficult to draw with given fps. Saved video will be in correct speed. Consider "
-                  "increasing tolerance.")
+        if int((1/fps - time_to_run) * 1000) > 0:
+            cv2.waitKey(int((1/fps - time_to_run) * 1000))
+        else:
+            if not error_shown:
+                print("WARNING: Scene too difficult to draw with given fps. Saved video will be in correct speed. "
+                      "Consider increasing tolerance.")
             cv2.waitKey(1)
             error_shown = True
+
+    writer.release()
 
 
 def distinct_contours(img, tolerance, bg_color):
