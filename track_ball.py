@@ -72,8 +72,7 @@ def main():
             cv2.waitKey(int((1/fps - time_to_run) * 1000))
         else:
             if not error_shown:
-                print("WARNING: Scene too difficult to draw with given fps. Saved video will be in correct speed. "
-                      "Consider increasing tolerance.")
+                print("WARNING: Scene too difficult to draw with given fps. Saved video will be in correct speed.")
                 error_shown = True
             cv2.waitKey(1)
 
